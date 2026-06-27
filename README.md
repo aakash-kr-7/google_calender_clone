@@ -9,30 +9,70 @@ A full-stack, pixel-perfect Google Calendar clone. This application supports use
 ## Architecture & Data Flow Diagram
 
 ```mermaid
-graph TD
-    User([User Browser]) -->|1. Interacts / Key Shortcuts| UI[React UI Viewports]
-    UI -->|2. Ctrl + K / Commands| Cmd[Command Palette]
-    UI -->|3. Hover / Double-Click| Preview[Hover Previews & Instant Creator]
-    UI -->|4. JWT Auth Header| API[FastAPI backend]
+flowchart LR
 
-    subgraph Frontend Client (Zustand & React)
-        UI
-        Cmd
-        Preview
-        Store[Zustand Stores: Event & Calendar]
-        Store -.->|Optimistic Updates| UI
-    end
+%% =========================
+%% Client
+%% =========================
+subgraph CLIENT["Frontend (React + Zustand)"]
+    U[User]
+    UI[Calendar UI]
+    CMD[Command Palette]
+    PREV[Hover Preview]
+    STORE[Zustand State]
 
-    subgraph Backend Server (FastAPI & SQLAlchemy)
-        API -->|Authentication Verification| Auth[Auth Router]
-        API -->|Overlap Check Service| Overlap[Event Service]
-        API -->|CRUD Events| Router[Events Router]
-    end
+    U --> UI
+    UI --> CMD
+    UI --> PREV
+    UI <--> STORE
+end
 
-    subgraph Persistence Layer
-        Auth -->|Write/Read Users| DB[(SQLite calendar.db)]
-        Router -->|Write/Read Events| DB
-    end
+%% =========================
+%% Backend
+%% =========================
+subgraph SERVER["Backend (FastAPI)"]
+    API[REST API]
+
+    AUTH[Authentication]
+    EVENTS[Events Router]
+    SERVICE[Event Service]
+    JWT[JWT Validation]
+
+    API --> JWT
+    JWT --> AUTH
+    API --> EVENTS
+    EVENTS --> SERVICE
+end
+
+%% =========================
+%% Database
+%% =========================
+subgraph DATABASE["SQLite"]
+    DB[(calendar.db)]
+
+    USERS[Users]
+    EVENTS_DB[Events]
+
+    DB --> USERS
+    DB --> EVENTS_DB
+end
+
+%% =========================
+%% Connections
+%% =========================
+STORE -->|JWT Requests| API
+
+AUTH --> USERS
+SERVICE --> EVENTS_DB
+
+SERVICE -->|Conflict Detection| EVENTS_DB
+SERVICE -->|Create / Update / Delete| EVENTS_DB
+
+EVENTS_DB --> SERVICE
+USERS --> AUTH
+
+SERVICE --> API
+API --> STORE
 ```
 
 ---
@@ -193,7 +233,9 @@ This application is deployed and running live on the cloud.
 ### Deployment Architecture & Configuration
 
 #### 1. Backend Web Service (Render)
+
 The backend API is hosted on Render as a Python Web Service linked directly to the main branch of this repository:
+
 - **Build Settings**:
   - **Root Directory**: `backend`
   - **Runtime**: `Python`
@@ -203,7 +245,9 @@ The backend API is hosted on Render as a Python Web Service linked directly to t
   - `DATABASE_URL`: `sqlite:///./calendar.db` (initializes and persists the SQLite database file)
 
 #### 2. Frontend SPA Client (Vercel)
+
 The React + Vite client is hosted on Vercel:
+
 - **Build Settings**:
   - **Root Directory**: `frontend`
   - **Framework Preset**: `Vite`
