@@ -115,10 +115,14 @@ export default function LoginPage() {
           
           <div>
             <div className="flex items-center space-x-3 mb-8">
-              <div className="bg-white/20 p-2.5 rounded-2xl backdrop-blur-md border border-white/20 shadow-md">
-                <Calendar className="w-7 h-7 text-white" />
+              <div className="bg-white p-1.5 rounded-2xl shadow-md border border-white/20">
+                <svg className="w-8 h-8" viewBox="0 0 48 48">
+                  <rect x="6" y="6" width="36" height="36" rx="8" fill="#1a73e8" />
+                  <rect x="14" y="18" width="20" height="20" rx="4" fill="#ffffff" />
+                  <text x="24" y="33" fill="#1a73e8" fontSize="16" fontWeight="bold" textAnchor="middle" fontFamily="sans-serif">27</text>
+                </svg>
               </div>
-              <span className="text-xl font-semibold tracking-wide font-sans">Calendar Clone</span>
+              <span className="text-xl font-bold tracking-wide font-sans">Google Calendar Clone</span>
             </div>
             
             <h2 className="text-3xl font-bold leading-tight mb-4">

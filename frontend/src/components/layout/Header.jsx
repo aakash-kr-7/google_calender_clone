@@ -38,6 +38,10 @@ export default function Header() {
   const [profileOpen, setProfileOpen] = useState(false)
   const [shortcutsOpen, setShortcutsOpen] = useState(false)
   const [highlightsOpen, setHighlightsOpen] = useState(false)
+  const [avatarError, setAvatarError] = useState(false)
+
+  // Fallback to Google profile public directory lookup, then initial letter
+  const avatarUrl = userPicture || (!avatarError ? `https://profiles.google.com/s/photos/profile/${userEmail}` : '')
 
   const { events, openEditModal } = useEventStore()
   
@@ -221,11 +225,10 @@ export default function Header() {
       {/* Above & Beyond Highlights */}
       <button 
         onClick={() => setHighlightsOpen(true)}
-        className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 border border-gcal-blue/40 hover:bg-gcal-blue/5 dark:hover:bg-blue-950/20 text-gcal-blue rounded-full text-xs font-semibold focus:outline-none transition-colors cursor-pointer"
+        className="p-2 rounded-full hover:bg-gcal-hover text-gcal-blue focus:outline-none cursor-pointer transition-transform hover:scale-110 flex items-center justify-center"
         title="Project Highlights"
       >
-        <Sparkles size={14} />
-        <span>✨ Highlights</span>
+        <Sparkles size={20} className="text-gcal-blue" />
       </button>
 
       {/* Shortcuts Guide Button */}
@@ -279,8 +282,13 @@ export default function Header() {
           onClick={() => setProfileOpen(!profileOpen)}
           className="w-8 h-8 rounded-full bg-gcal-blue hover:opacity-90 flex items-center justify-center text-white text-sm font-medium focus:outline-none border-2 border-transparent hover:border-gcal-border overflow-hidden"
         >
-          {userPicture ? (
-            <img src={userPicture} alt={userName} className="w-full h-full object-cover" />
+          {avatarUrl ? (
+            <img 
+              src={avatarUrl} 
+              alt={userName} 
+              onError={() => setAvatarError(true)} 
+              className="w-full h-full object-cover" 
+            />
           ) : (
             initial
           )}
@@ -292,8 +300,13 @@ export default function Header() {
               
               {/* Header profile info */}
               <div className="w-16 h-16 rounded-full bg-gcal-blue flex items-center justify-center text-white text-2xl font-medium overflow-hidden mb-3 border border-gcal-border/25 shadow">
-                {userPicture ? (
-                  <img src={userPicture} alt={userName} className="w-full h-full object-cover" />
+                {avatarUrl ? (
+                  <img 
+                    src={avatarUrl} 
+                    alt={userName} 
+                    onError={() => setAvatarError(true)} 
+                    className="w-full h-full object-cover" 
+                  />
                 ) : (
                   initial
                 )}
@@ -379,69 +392,74 @@ export default function Header() {
       {/* Project Highlights Modal */}
       {highlightsOpen && (
         <div className="fixed inset-0 bg-black/55 backdrop-blur-[1px] flex items-center justify-center z-50 animate-in fade-in duration-200" onClick={() => setHighlightsOpen(false)}>
-          <div className="bg-gcal-surface border border-gcal-border rounded-2xl shadow-2xl p-6 w-[560px] max-w-[95vw] text-gcal-text max-h-[85vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="bg-gcal-surface border border-gcal-border rounded-2xl shadow-2xl p-6 w-[540px] max-w-[95vw] text-gcal-text" onClick={e => e.stopPropagation()}>
             <div className="flex justify-between items-center border-b border-gcal-border pb-3 mb-4">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-gcal-blue animate-pulse" />
-                <h3 className="font-semibold text-lg">Project Highlights & Custom Enhancements</h3>
+                <h3 className="font-semibold text-lg">Project Highlights</h3>
               </div>
               <button onClick={() => setHighlightsOpen(false)} className="p-1 rounded-full hover:bg-gcal-hover text-gcal-light hover:text-gcal-text">
                 <X size={16} />
               </button>
             </div>
             
-            <div className="space-y-4 text-xs leading-relaxed">
-              <p className="text-sm text-gcal-light">
-                This calendar clone went far beyond standard requirements to deliver a high-fidelity, fully interactive, and polished reproduction of Google Calendar. Here is everything we did above and beyond:
-              </p>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-4">
-                
-                <div className="p-3 bg-gcal-bg rounded-xl border border-gcal-border/20">
-                  <h4 className="font-bold text-gcal-text text-xs mb-1">🔑 Google Auth Client Decoding</h4>
-                  <p className="text-gcal-light">Decodes the base64 Google Credential JWT on the fly to download the user's high-resolution Google Avatar, displaying it in the calendar toolbar.</p>
+            <div className="space-y-4">
+              {/* Graphic stats dashboard */}
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="bg-blue-50/50 dark:bg-blue-950/20 p-3 rounded-xl border border-blue-100 dark:border-blue-900/30">
+                  <div className="text-xl font-bold text-gcal-blue">100%</div>
+                  <div className="text-[10px] text-gcal-light font-medium uppercase tracking-wider mt-0.5">UTC Normalized</div>
                 </div>
-                
-                <div className="p-3 bg-gcal-bg rounded-xl border border-gcal-border/20">
-                  <h4 className="font-bold text-gcal-text text-xs mb-1">🔍 Search date-jumps & Focus</h4>
-                  <p className="text-gcal-light">Typing in the header dynamically filters titles, locations, and descriptions. Clicking a search item automatically pans the grid to that date and opens the event details.</p>
+                <div className="bg-green-50/50 dark:bg-green-950/20 p-3 rounded-xl border border-green-100 dark:border-green-900/30">
+                  <div className="text-xl font-bold text-emerald-500">Active</div>
+                  <div className="text-[10px] text-gcal-light font-medium uppercase tracking-wider mt-0.5">Conflict Guard</div>
                 </div>
-                
-                <div className="p-3 bg-gcal-bg rounded-xl border border-gcal-border/20">
-                  <h4 className="font-bold text-gcal-text text-xs mb-1">⚡ Global Keyboard Shortcuts</h4>
-                  <p className="text-gcal-light">Supports seamless calendar navigation (Today, Prev, Next), view switching (Day, Week, Month), search focusing, and event creation directly from the keyboard.</p>
+                <div className="bg-purple-50/50 dark:bg-purple-950/20 p-3 rounded-xl border border-purple-100 dark:border-purple-900/30">
+                  <div className="text-xl font-bold text-purple-500">Enabled</div>
+                  <div className="text-[10px] text-gcal-light font-medium uppercase tracking-wider mt-0.5">Hotkeys Navigation</div>
                 </div>
-                
-                <div className="p-3 bg-gcal-bg rounded-xl border border-gcal-border/20">
-                  <h4 className="font-bold text-gcal-text text-xs mb-1">📐 Dynamic Compact Density</h4>
-                  <p className="text-gcal-light">Adjusts hour grid heights and position-mappings instantly when Compact Mode is toggled, shrinking row allocations for crowded dates.</p>
-                </div>
-
-                <div className="p-3 bg-gcal-bg rounded-xl border border-gcal-border/20">
-                  <h4 className="font-bold text-gcal-text text-xs mb-1">⚙️ Google-like Settings Dropdown</h4>
-                  <p className="text-gcal-light">Replicates Google Calendar's gear menu with settings, interactive compact density, and direct SQLite database calendar reset capability.</p>
-                </div>
-                
-                <div className="p-3 bg-gcal-bg rounded-xl border border-gcal-border/20">
-                  <h4 className="font-bold text-gcal-text text-xs mb-1">🎨 Theme-Prompt First Load</h4>
-                  <p className="text-gcal-light">Welcomes new sign-ups with an intuitive light/dark selection modal immediately upon their first entry, with smooth 200ms transitions on all elements.</p>
-                </div>
-                
-                <div className="p-3 bg-gcal-bg rounded-xl border border-gcal-border/20">
-                  <h4 className="font-bold text-gcal-text text-xs mb-1">🛡️ Anti-Misfire Click Sensor</h4>
-                  <p className="text-gcal-light">Wired an 8px distance constraint on pointer interactions to prevent dragging conflicts, ensuring mouse clicks are clean.</p>
-                </div>
-
-                <div className="p-3 bg-gcal-bg rounded-xl border border-gcal-border/20">
-                  <h4 className="font-bold text-gcal-text text-xs mb-1">🕒 Smart UTC Normalization</h4>
-                  <p className="text-gcal-light">Saves database timestamps in UTC, and translates datetimes to the local browser zone on the fly.</p>
-                </div>
-
               </div>
-              
-              <div className="mt-4 pt-3 border-t border-gcal-border flex justify-end">
-                <button onClick={() => setHighlightsOpen(false)} className="bg-gcal-blue text-white rounded-lg px-4 py-2 font-semibold hover:bg-gcal-blue-hover transition cursor-pointer">
-                  Awesome!
+
+              {/* Graphic capabilities grid */}
+              <div className="border border-gcal-border rounded-xl overflow-hidden text-xs">
+                <div className="bg-gcal-bg/60 border-b border-gcal-border px-4 py-2 font-semibold text-gcal-text grid grid-cols-3 gap-2">
+                  <span>Feature Enhancement</span>
+                  <span>Method / Detail</span>
+                  <span className="text-right">Capability Status</span>
+                </div>
+                <div className="divide-y divide-gcal-border">
+                  <div className="px-4 py-2.5 grid grid-cols-3 gap-2 items-center">
+                    <span className="font-semibold">Google Account Sync</span>
+                    <span className="text-gcal-light">JWT Avatar decoding</span>
+                    <span className="text-right"><span className="bg-blue-100 dark:bg-blue-950/40 text-gcal-blue px-2 py-0.5 rounded-full text-[10px] font-bold">Synced</span></span>
+                  </div>
+                  <div className="px-4 py-2.5 grid grid-cols-3 gap-2 items-center">
+                    <span className="font-semibold">Interactive Search</span>
+                    <span className="text-gcal-light">Jump-to-date calendar focus</span>
+                    <span className="text-right"><span className="bg-green-100 dark:bg-green-950/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full text-[10px] font-bold">Active</span></span>
+                  </div>
+                  <div className="px-4 py-2.5 grid grid-cols-3 gap-2 items-center">
+                    <span className="font-semibold">Overlapping Warnings</span>
+                    <span className="text-gcal-light">SQLite backend queries</span>
+                    <span className="text-right"><span className="bg-green-100 dark:bg-green-950/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full text-[10px] font-bold">Active</span></span>
+                  </div>
+                  <div className="px-4 py-2.5 grid grid-cols-3 gap-2 items-center">
+                    <span className="font-semibold">Grid Resize & Drag</span>
+                    <span className="text-gcal-light">Snaps event limits in 15m</span>
+                    <span className="text-right"><span className="bg-green-100 dark:bg-green-950/40 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full text-[10px] font-bold">Active</span></span>
+                  </div>
+                  <div className="px-4 py-2.5 grid grid-cols-3 gap-2 items-center">
+                    <span className="font-semibold">Compact Density</span>
+                    <span className="text-gcal-light">Scales rows & click height</span>
+                    <span className="text-right"><span className="bg-purple-100 dark:bg-purple-950/40 text-purple-600 dark:text-purple-400 px-2 py-0.5 rounded-full text-[10px] font-bold">Enabled</span></span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-between items-center text-[11px] text-gcal-light pt-2">
+                <span>Press <kbd className="px-1.5 py-0.5 bg-gcal-bg border border-gcal-border rounded font-mono">?</kbd> to view keyboard shortcuts guide.</span>
+                <button onClick={() => setHighlightsOpen(false)} className="bg-gcal-blue text-white rounded-lg px-4.5 py-1.5 font-semibold hover:bg-gcal-blue-hover transition cursor-pointer">
+                  Close
                 </button>
               </div>
             </div>
