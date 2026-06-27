@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
-import { loginUser, loginGoogle } from '../api/client'
+import { loginUser, loginGoogle, getMe } from '../api/client'
 import toast, { Toaster } from 'react-hot-toast'
 import { Calendar, Lock, Mail, ChevronRight, HelpCircle, X, Check, Copy } from 'lucide-react'
 
@@ -65,7 +65,14 @@ export default function LoginPage() {
     try {
       const res = await loginGoogle({ credential: response.credential })
       localStorage.setItem('token', res.data.access_token)
-      localStorage.setItem('user', JSON.stringify({ email: email || 'google-user@gmail.com' }))
+      
+      // Fetch correct profile email and details from the backend
+      const meRes = await getMe()
+      localStorage.setItem('user', JSON.stringify(meRes.data))
+      
+      // Reset theme prompted flag to show theme selection modal on load
+      localStorage.setItem('gcal-theme-prompted', 'false')
+
       toast.success('Successfully signed in with Google!')
       setTimeout(() => navigate('/'), 800)
     } catch (err) {
@@ -81,7 +88,14 @@ export default function LoginPage() {
     try {
       const res = await loginUser({ email, password })
       localStorage.setItem('token', res.data.access_token)
-      localStorage.setItem('user', JSON.stringify({ email }))
+      
+      // Fetch correct profile email and details from the backend
+      const meRes = await getMe()
+      localStorage.setItem('user', JSON.stringify(meRes.data))
+
+      // Reset theme prompted flag to show theme selection modal on load
+      localStorage.setItem('gcal-theme-prompted', 'false')
+
       toast.success('Welcome back!')
       setTimeout(() => navigate('/'), 800)
     } catch (err) {

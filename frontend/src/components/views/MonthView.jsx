@@ -74,6 +74,7 @@ export default function MonthView() {
           return (
             <div
               key={i}
+              onClick={() => openCreateModal({ start: day, end: day })}
               onDoubleClick={() => openCreateModal({ start: day, end: day })}
               className={clsx(
                 'border-b border-r border-gcal-border p-1 min-h-[100px] cursor-pointer hover:bg-gcal-hover transition-colors duration-200 flex flex-col',

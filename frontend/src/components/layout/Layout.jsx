@@ -120,10 +120,8 @@ export default function Layout() {
   }, [])
 
   const handleThemeSelect = (isDark) => {
-    const { darkMode, toggleDarkMode } = useSettingsStore.getState()
-    if (darkMode !== isDark) {
-      toggleDarkMode()
-    }
+    const { setDarkMode } = useSettingsStore.getState()
+    setDarkMode(isDark)
     setPromptStep(2)
   }
 
@@ -197,17 +195,33 @@ export default function Layout() {
                 <div className="w-12 h-12 rounded-full bg-gcal-blue/10 flex items-center justify-center text-gcal-blue mb-4 animate-bounce">
                   <Sparkles className="w-6 h-6" />
                 </div>
-                <h2 className="text-xl font-semibold text-gcal-text mb-3">Made with 💙</h2>
-                <p className="text-xs text-gcal-text/90 leading-relaxed mb-6 px-3">
-                  This calendar is crafted with love and intent to give as close to the Google Calendar experience as possible.
-                  <br /><br />
-                  We have also done some extra fun things (like custom search jumps and keyboard hotkeys) which you can check out by clicking the <strong className="text-gcal-blue font-semibold">Highlights button</strong> in the top header.
-                </p>
+                <h2 className="text-xl font-bold text-gcal-text mb-3">Google Calendar Clone</h2>
+                
+                <div className="text-sm leading-relaxed space-y-4 mb-6 text-left w-full">
+                  <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/30 p-3 rounded-lg flex items-start gap-2.5">
+                    <span className="text-base">⭐</span>
+                    <p className="text-xs text-gcal-text">
+                      The <strong className="font-semibold text-gcal-blue">star symbol (Sparkles icon)</strong> at the top shows all the extra features and enhancements implemented.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-850 p-3 rounded-lg flex items-start gap-2.5">
+                    <span className="text-base">📖</span>
+                    <p className="text-xs text-gcal-text">
+                      The GitHub repository <strong className="font-semibold text-gcal-text">README.md</strong> contains all the questions and viable documentation.
+                    </p>
+                  </div>
+
+                  <p className="text-center font-medium text-xs text-gcal-light pt-2">
+                    Please enjoy Google Calendar Clone built by <strong className="text-gcal-blue font-semibold">Aakash Kumar</strong>
+                  </p>
+                </div>
+
                 <button
                   onClick={handleWelcomeDismiss}
                   className="w-full bg-gcal-blue hover:bg-gcal-blue-hover text-white text-sm font-semibold rounded-xl py-3 transition shadow-md cursor-pointer"
                 >
-                  Awesome, let's go!
+                  Boot Up App & Enjoy!
                 </button>
               </>
             )}

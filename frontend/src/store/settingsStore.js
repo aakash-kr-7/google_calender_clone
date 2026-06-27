@@ -43,6 +43,16 @@ export const useSettingsStore = create((set, get) => {
       set({ darkMode: next })
     },
 
+    setDarkMode: (value) => {
+      localStorage.setItem('gcal-darkMode', JSON.stringify(value))
+      if (value) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+      }
+      set({ darkMode: value })
+    },
+
     setWeekStartsOn: (day) => {
       localStorage.setItem('gcal-weekStartsOn', JSON.stringify(day))
       set({ weekStartsOn: day })

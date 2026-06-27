@@ -133,6 +133,7 @@ export default function TimeGrid({ days, events }) {
           return (
             <div
               key={dayIdx}
+              onClick={(e) => handleGridDoubleClick(e, day)}
               onDoubleClick={(e) => handleGridDoubleClick(e, day)}
               className={clsx(
                 'flex-1 relative border-l border-gcal-border transition-colors duration-200 select-none cursor-pointer',
@@ -186,6 +187,7 @@ export default function TimeGrid({ days, events }) {
                   left={event.leftPercent + 1}
                   width={event.widthPercent - 2}
                   onClick={(e) => {
+                    e.stopPropagation()
                     handleMouseLeaveEvent()
                     setPopover({ event, x: e.clientX + 8, y: e.clientY - 40 })
                   }}

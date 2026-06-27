@@ -80,6 +80,7 @@ export default function RegisterPage() {
         name: decoded?.name || decoded?.email?.split('@')[0] || 'User',
         picture: decoded?.picture || ''
       }))
+      localStorage.setItem('gcal-theme-prompted', 'false')
       toast.success('Successfully registered with Google!')
       setTimeout(() => navigate('/'), 800)
     } catch (err) {
@@ -99,6 +100,7 @@ export default function RegisterPage() {
       const res = await registerUser({ email, password })
       localStorage.setItem('token', res.data.access_token)
       localStorage.setItem('user', JSON.stringify({ email }))
+      localStorage.setItem('gcal-theme-prompted', 'false')
       toast.success('Account created successfully!')
       setTimeout(() => navigate('/'), 800)
     } catch (err) {

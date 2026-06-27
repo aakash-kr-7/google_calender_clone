@@ -108,6 +108,7 @@ export default function Header() {
     setProfileOpen(false)
     localStorage.removeItem('token')
     localStorage.removeItem('user')
+    localStorage.removeItem('gcal-theme-prompted')
     toast.success("Successfully logged out!")
     setTimeout(() => {
       window.location.href = '/login'
@@ -233,7 +234,7 @@ export default function Header() {
       <button 
         onClick={() => setHighlightsOpen(true)}
         className="p-2 rounded-full hover:bg-gcal-hover text-gcal-blue focus:outline-none cursor-pointer transition-transform hover:scale-110 flex items-center justify-center"
-        title="Project Highlights"
+        title="Project Highlights & Extras (Bonus Features)"
       >
         <Sparkles size={20} className="text-gcal-blue" />
       </button>
@@ -288,6 +289,11 @@ export default function Header() {
         {getGreeting()}, {userName}
       </span>
 
+      {/* Logged in Email address */}
+      <span className="hidden sm:inline-block text-xs font-medium text-gcal-text bg-gcal-hover/50 px-2.5 py-1.5 rounded-lg border border-gcal-border/80 mr-1 select-all animate-in fade-in duration-200">
+        {userEmail}
+      </span>
+
       {/* User profile avatar */}
       <div className="relative">
         <button 
@@ -324,7 +330,9 @@ export default function Header() {
                 )}
               </div>
               <h3 className="font-semibold text-gcal-text text-base leading-tight">{userName}</h3>
-              <p className="text-xs text-gcal-light font-mono mt-0.5 mb-4">{userEmail}</p>
+              <p className="text-xs text-gcal-light font-mono mt-2 mb-4 bg-gcal-bg border border-gcal-border px-3 py-1.5 rounded-lg w-full break-all">
+                Logged in with this email id: <span className="font-semibold text-gcal-blue">{userEmail}</span>
+              </p>
               
               <a 
                 href="https://myaccount.google.com/" 
@@ -408,7 +416,7 @@ export default function Header() {
             <div className="flex justify-between items-center border-b border-gcal-border pb-3 mb-4">
               <div className="flex items-center gap-2">
                 <Sparkles className="w-5 h-5 text-gcal-blue animate-pulse" />
-                <h3 className="font-semibold text-lg">Project Highlights</h3>
+                <h3 className="font-semibold text-lg">Project Highlights & Extras</h3>
               </div>
               <button onClick={() => setHighlightsOpen(false)} className="p-1 rounded-full hover:bg-gcal-hover text-gcal-light hover:text-gcal-text">
                 <X size={16} />
@@ -416,6 +424,13 @@ export default function Header() {
             </div>
             
             <div className="space-y-4">
+              {/* Note about extra/bonus features */}
+              <div className="bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 p-3.5 rounded-xl text-xs text-amber-800 dark:text-amber-200">
+                <div className="font-bold flex items-center gap-1.5 mb-1 text-amber-900 dark:text-amber-300">
+                  <span>⭐ Above & Beyond Extras (Bonus Features)</span>
+                </div>
+                These are "nice-to-have" features that were <strong className="font-semibold text-amber-950 dark:text-amber-100">not mentioned in the core requirements</strong>, but have been added to provide an elevated and fully featured calendar experience.
+              </div>
               {/* Graphic stats dashboard */}
               <div className="grid grid-cols-3 gap-3 text-center">
                 <div className="bg-blue-50/50 dark:bg-blue-950/20 p-3 rounded-xl border border-blue-100 dark:border-blue-900/30">
