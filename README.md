@@ -161,6 +161,47 @@ The frontend application will boot up at [http://localhost:5173](http://localhos
 
 ---
 
+## Database Migrations
+
+If you are upgrading an existing database, run the migration script in the backend folder to add the new `attendees` column to your events table:
+
+```bash
+cd backend
+python migrate.py
+```
+
+Alternatively, you can delete the `backend/calendar.db` file, and a fresh database with the updated columns will be initialized automatically on the next server startup.
+
+---
+
+## Deployment Guide (Vercel & Render)
+
+To share a hosted link of this application, you can deploy the frontend and backend in minutes using free tiers on Vercel and Render.
+
+### 1. Host the Backend API on Render
+1. Sign up on [Render](https://render.com/).
+2. Create a new **Web Service** and connect this GitHub repository.
+3. Configure the following build settings:
+   - **Root Directory**: `backend`
+   - **Runtime**: `Python`
+   - **Build Command**: `pip install -r requirements.txt`
+   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+4. Add the following environment variables under **Environment**:
+   - `DATABASE_URL`: `sqlite:///./calendar.db`
+5. Click **Deploy**. Copy the generated service URL (e.g. `https://your-backend.onrender.com`).
+
+### 2. Host the Frontend UI on Vercel
+1. Sign up on [Vercel](https://vercel.com/).
+2. Create a new project and import this GitHub repository.
+3. In the project setup, select **Vite** as the **Framework Preset**.
+4. Set the **Root Directory** to `frontend`.
+5. Add the following environment variables:
+   - `VITE_API_URL`: Paste your Render backend URL (e.g. `https://your-backend.onrender.com`).
+   - `VITE_GOOGLE_CLIENT_ID`: (Optional) Your Google OAuth client credentials.
+6. Click **Deploy**. Vercel will provide your hosted live link (e.g. `https://gcal-clone.vercel.app`).
+
+---
+
 ## Future Enhancements
 
 1. **Collaboration Features**: Add shared calendars, real-time sync via WebSockets, and calendar invitation emails.
