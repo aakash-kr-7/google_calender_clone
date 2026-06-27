@@ -1,6 +1,37 @@
 # Google Calendar Clone (gcal-clone)
 
-A full-stack, pixel-perfect Google Calendar clone. This application supports user authentication, responsive day/week/month views, event dragging, event resizing, recurrence rules parsing, and scheduling overlap conflict detections.
+A full-stack, pixel-perfect Google Calendar clone. This application supports user authentication (including Google OAuth), responsive day/week/month views, event dragging, event resizing, recurrence rules parsing, scheduling overlap conflict detections, and power-user workflows.
+
+---
+
+## Architecture & Data Flow Diagram
+
+```mermaid
+graph TD
+    User([User Browser]) -->|1. Interacts / Key Shortcuts| UI[React UI Viewports]
+    UI -->|2. Ctrl + K / Commands| Cmd[Command Palette]
+    UI -->|3. Hover / Double-Click| Preview[Hover Previews & Instant Creator]
+    UI -->|4. JWT Auth Header| API[FastAPI backend]
+    
+    subgraph Frontend Client (Zustand & React)
+        UI
+        Cmd
+        Preview
+        Store[Zustand Stores: Event & Calendar]
+        Store -.->|Optimistic Updates| UI
+    end
+    
+    subgraph Backend Server (FastAPI & SQLAlchemy)
+        API -->|Authentication Verification| Auth[Auth Router]
+        API -->|Overlap Check Service| Overlap[Event Service]
+        API -->|CRUD Events| Router[Events Router]
+    end
+    
+    subgraph Persistence Layer
+        Auth -->|Write/Read Users| DB[(SQLite calendar.db)]
+        Router -->|Write/Read Events| DB
+    end
+```
 
 ---
 
@@ -13,14 +44,14 @@ A full-stack, pixel-perfect Google Calendar clone. This application supports use
   - *Why*: Modernized Python database engine offering robust transaction management, query relationships mapping, and clean data modeling syntax.
 - **Database**: **SQLite**
   - *Why*: Lightweight, single-file database that simplifies local configuration and runs cross-platform without external database daemon dependencies.
-- **Authentication**: **JWT (JSON Web Tokens)** + **Passlib (Bcrypt)**
-  - *Why*: Secure, stateless user sessions matching modern SPA standards, with reliable password hashing.
+- **Authentication**: **JWT (JSON Web Tokens)** + **Google OAuth Integration**
+  - *Why*: Allows secure, stateless user sessions matching modern SPA standards, alongside frictionless authentication using the user's Google account credentials.
 
 ### Frontend
-- **Framework**: **React 18** (via **Vite**)
-  - *Why*: Vite provides near-instantaneous hot module reloading (HMR) and ultra-fast builds. React offers component reusability and clean state bindings.
+- **Framework**: **React 18** (bootstrapped via **Vite**)
+  - *Why*: Vite provides near-instantaneous hot module reloading (HMR) and ultra-fast production builds. React offers component reusability and clean state bindings.
 - **Styling**: **Tailwind CSS**
-  - *Why*: Low-level utility classes that allow us to replicate the official Google Calendar theme, fonts, borders, and margins with maximum fidelity.
+  - *Why*: Utility-first styling classes that allow us to replicate the official Google Calendar theme, fonts, borders, and margins with maximum fidelity, including dark mode support.
 - **State Management**: **Zustand**
   - *Why*: Simple, boilerplate-free state store that provides clean getter/setter actions, avoiding the overhead of heavy Redux setups.
 - **Date Utilities**: **date-fns** & **rrule**
@@ -30,88 +61,44 @@ A full-stack, pixel-perfect Google Calendar clone. This application supports use
 
 ---
 
-## How the Project Works
+## Business Logic & Edge Cases
 
-The application operates as a decoupled single-page application (SPA) communicating with a JSON REST API:
-
-```mermaid
-graph TD
-    User([User Browser]) -->|Loads| FE[Vite React SPA]
-    FE -->|API Requests / JWT| BE[FastAPI Server]
-    BE -->|SQL queries| DB[(SQLite calendar.db)]
-```
-
-### 1. The Database Layout
-- **Users**: Holds registration emails and hashed passwords.
-- **Events**: Represents event entries. Key fields include:
-  - `start_time` & `end_time` (stored as naive UTC datetimes).
-  - `rrule` string (e.g. `FREQ=WEEKLY` for repeating occurrences).
-  - `recurrence_id` (foreign key to self, marking exception overrides if a user edits a specific occurrence of a recurring series).
-
-### 2. Timezone Normalization
+### 1. Timezone Normalization
 To prevent scheduling offsets across clients:
 - The backend accepts and normalizes all incoming datetimes to naive UTC.
 - The frontend converts UTC ISO strings received from the API into local JS `Date` objects, aligning event displays automatically with the browser's local timezone.
 
-### 3. Overlap Conflict Detection
+### 2. Overlap Conflict Detection
 - When creating or modifying an event (excluding all-day and recurring parent events), the backend calculates overlapping intervals using:
   `A_start < B_end AND A_end > B_start`
 - If an overlap exists, the API rejects the request with a `409 Conflict` containing the conflicting events list.
-- The frontend interceptor triggers a custom toast banner presenting the scheduling conflict. The user can either cancel the save or proceed to "Save anyway" (which appends `?force=true` to bypass the check).
+- **Conflict Handling suggestions**: If an overlap is encountered, the scheduling assistant calculates the next 3 available non-overlapping time slots of the same duration within working hours (9:00 AM – 6:00 PM) for the currently visible week. These recommendations are displayed in the toast warning and the creation modal. The user can either click a suggestion to pre-fill it or click "Save anyway" to override.
 
-### 4. Drag-and-Drop and Resize Logic
-- Time grid events are positioned using percentage height coordinates:
-  - `Top% = (Minutes from Midnight / 1440) * 100`
-  - `Height% = (Duration in Minutes / 1440) * 100`
+### 3. Drag-and-Drop Activation Threshold
 - Moving blocks uses `dnd-kit` coordinates to compute vertical delta pixels, which are mapped to 15-minute time intervals.
-- The frontend updates the display optimistically for zero lag, sending a patch call to the API background server. If the network call fails, the store rolls back the display.
+- To prevent accidental event movement during simple clicks, we use `useSensors` with a `PointerSensor` configured to a **8px activation distance constraint**.
 
 ---
 
-## Development History: Step-by-Step
+## Implementation of Animations & Interactions
 
-Here is how I built the project from the ground up, starting from the backend database layer and ending with the protected frontend routing.
-
-### Step 1: Setting up the Database and Models
-I started by building the database connection. I wrote `database.py` using SQLAlchemy, ensuring `connect_args={"check_same_thread": False}` was set so SQLite could process concurrent queries safely in FastAPI's multithreaded environment. Next, I wrote the tables: `User` in `models/user.py` and `Event` in `models/event.py`. I made sure the event model was equipped with self-referential relations (`recurrence_id`) so that we could create specific exceptions on recurring series without losing track of the parent template.
-
-### Step 2: Timezone Normalization & Conflict Services
-To handle international scheduling, I created `utils/timezone.py` to strip incoming timezone headers and normalize datetimes to UTC. I then programmed the business logic inside `services/event_service.py` to query active calendar grids. Here, I implemented the range querying logic and the interval overlap checking queries, which exclude all-day and parent recurring templates to only alert on blockable hours.
-
-### Step 3: Schemas and Authentication Endpoints
-Next, I defined Pydantic validation schemas in `schemas/user.py` and `schemas/event.py`, adding custom decorators to verify that event end-times occur after start-times. With models and schemas ready, I wrote the authentication logic in `routers/auth.py`. I utilized `passlib` to verify passwords against stored hashes, and generated HS256 JWT access tokens for validated sessions.
-
-### Step 4: CRUD Event Routers and Server Assembly
-I implemented `/events` routes in `routers/events.py`. The GET endpoint queries date-ranges, while the POST and PATCH endpoints run overlap checks, prompting conflict alerts unless overridden with the `force` parameter. I also added exception overrides routes (`/events/{id}/exceptions`). I assembled the main gateway `main.py`, adding CORS headers and a startup event listener to automatically initialize SQL tables in `calendar.db` if missing.
-
-### Step 5: Frontend Configuration & Store Configuration
-With the backend working, I switched to the frontend. I set up Vite, Tailwind CSS, and PostCSS configurations, mapping custom theme colors (`gcal-blue`, `gcal-text`) and default Google Sans typography. I wrote the Axios API client (`api/client.js`) to append JWT bearer tokens to requests and automatically log users out on 401 statuses. I then built the global stores using Zustand: `calendarStore.js` for view management and `eventStore.js` for event caching, drafting, and conflict toast warnings.
-
-### Step 6: Layout Algorithms, Drag-and-Drop & Resizing Hooks
-To handle side-by-side rendering of conflicting event blocks, I wrote a sweep-line partition algorithm in `utils/eventLayout.js` to calculate column widths and left offset percentages. I created `hooks/useEvents.js` to fetch date ranges as the user navigates. Then, I wrote the user interaction hooks: `useDragDrop.js` for vertical grid shifting with optimistic display updates, and `useResize.js` using document mouse listeners to modify event block heights.
-
-### Step 7: View Sheets, Forms, and Protected Routing
-Finally, I created the UI elements (buttons, spinners, conflict notifications). I built layout elements (Header, collateral Sidebar, layout wrapper), view sheets (`DayView`, `WeekView`, and the 35-day grid `MonthView`), and authorization sheets (`LoginPage`, `RegisterPage`). Lastly, I wrote `App.jsx`, incorporating protected route gates and configuring `DndContext` with activation offsets so that user clicks on event blocks still correctly trigger preview popovers.
+- **Spring-Scale Modal Entrances**: The event modal mounts using a custom keyframe scale transition combined with a physics-inspired spring cubic-bezier easing (`cubic-bezier(0.34, 1.56, 0.64, 1)`).
+- **Drag drop release glide**: On releasing an event drag, the `transform` smoothly transitions back to `0` with a `200ms` spring transition, preventing visual jumps.
+- **Active Current Time Pulse**: The current-time indicator line moves using transitions on its CSS `top` coordinate. The red indicator circle pulses dynamically (`animate-time-pulse` keyframe) to create a sense of presence.
+- **Hover Previews & Scale Elevation**: Event blocks scale by `1.025` and animate their z-index on hover. Simultaneously, a lightweight event preview card (`EventHoverPreview.jsx`) fades in after a `150ms` delay to show description, location, time, and guests.
+- **Skeleton Shimmer Loading**: Loading states display calendar skeleton layouts containing shimmer animations, mimicking actual columns and month grids to decrease perceived loading latency.
+- **Undo Delete Toast**: Deleting an event triggers a custom toast notification with a 5-second timer. If "Undo" is clicked, it restores the deleted event by sending the cached data back to the server.
+- **Empty Slot Double-Click**: Double-clicking on any empty cell in the Day, Week, or Month view instantly triggers the creation modal pre-filled with the exact day and time coordinates clicked.
 
 ---
 
 ## Installation & Running Locally
 
-Follow these steps to run the complete project on any system:
+Follow these steps to run the complete project on your local machine:
 
 ### Prerequisites
-Make sure you have the following installed:
-- **Python 3.10+**
-- **Node.js 18+** & **npm**
-- **Git**
-
-### Clone the Repository
-```bash
-git clone https://github.com/aakash-kr-7/google_calender_clone.git
-cd google_calender_clone
-```
-
----
+- Python 3.10+
+- Node.js 18+
 
 ### Step 1: Run the Backend API
 
@@ -119,25 +106,32 @@ cd google_calender_clone
    ```bash
    cd backend
    ```
-2. Create and activate a virtual environment:
+2. Create a clean virtual environment:
    ```bash
-   # Windows (PowerShell)
    python -m venv venv
-   .\venv\Scripts\Activate.ps1
-
-   # macOS/Linux
-   python3 -m venv venv
-   source venv/bin/activate
    ```
-3. Install the dependencies:
+3. Activate the virtual environment:
+   - **Windows (CMD/PowerShell)**:
+     ```bash
+     .\venv\Scripts\activate
+     ```
+   - **macOS/Linux**:
+     ```bash
+     source venv/bin/activate
+     ```
+4. Install python dependencies:
    ```bash
    pip install -r requirements.txt
    ```
-4. Copy the environment config:
+5. Copy the environment configuration:
    ```bash
    cp .env.example .env
    ```
-5. Start the FastAPI server:
+6. Run database migrations:
+   ```bash
+   python migrate.py
+   ```
+7. Start the FastAPI server:
    ```bash
    uvicorn app.main:app --reload --port 8000
    ```
@@ -147,11 +141,11 @@ The backend will run on [http://localhost:8000](http://localhost:8000). You can 
 
 ### Step 2: Run the Frontend UI
 
-1. Open a new terminal window, navigate to the frontend directory:
+1. Open a new terminal window and navigate to the frontend directory:
    ```bash
    cd frontend
    ```
-2. Install the node modules:
+2. Install node modules:
    ```bash
    npm install
    ```
@@ -163,20 +157,42 @@ The backend will run on [http://localhost:8000](http://localhost:8000). You can 
    ```bash
    npm run dev
    ```
-The frontend application will boot up at [http://localhost:5173](http://localhost:5173). 
-
-Open this address in your browser, register an account, and begin scheduling!
+The frontend application will boot up at [http://localhost:5173](http://localhost:5173). Open this address in your browser, register an account, and begin scheduling!
 
 ---
 
-### Database Migrations
+## Future Enhancements
 
-If you are upgrading an existing database, run the migration script in the backend folder to add the new `attendees` column to your events table:
+1. **Collaboration Features**: Add shared calendars, real-time sync via WebSockets, and calendar invitation emails.
+2. **Notification Delivery**: Set up email or browser push notifications before events start.
+3. **Full Recurring Exceptions**: Complete exceptions management (editing "this and all following events") to match enterprise standards.
 
-```bash
-cd backend
-python migrate.py
-```
+---
 
-Alternatively, you can delete the `backend/calendar.db` file, and a fresh database with the updated columns will be initialized automatically on the next server startup.
+## Theory Questions
 
+### Imagine your calendar application now serves one million users. How would you redesign the backend to efficiently retrieve events, support recurring events, and prevent inconsistencies when multiple devices edit the same event?
+
+1. **Efficient Event Retrieval**:
+   - **Database Sharding**: Shard the SQL database horizontally by `user_id`. Since all event retrievals and mutations are scoped to individual users, queries will run in parallel against specific shards, preventing database bottlenecking.
+   - **Caching Layer (Redis)**: Introduce Redis caching to store query ranges (e.g., active month/week) for each user. Using Sorted Sets (ZSET) with event start/end times as scores allows high-speed range queries without touching the main database.
+   - **Read-Write Separation**: Set up database replication with primary-replica architecture. Direct writes to primary nodes and route queries to read-replicas.
+2. **Recurring Event Support at Scale**:
+   - Avoid expanding recurrence rules to static rows in the database, which bloats storage. Instead, store only the **Parent Recurrence Template** (with the `rrule` rule string) and **Override Exception Rows** (exceptions).
+   - Perform recurrence expansions in-memory at the application server layer on GET requests using high-performance C-extensions/Rust routines, or pre-expand and cache occurrences in Redis only for the immediate 3 months ahead.
+3. **Preventing Inconsistencies (Concurrency Control)**:
+   - **Optimistic Locking**: Add a `version` (or `updated_at` timestamp) column to the `events` table. When updating an event, verify the version matches: `UPDATE events SET title = :new_title, version = version + 1 WHERE id = :id AND version = :old_version`. If a write conflict occurs (version mismatch), reject the change and prompt the user to resolve the conflict.
+   - **Distributed Locks**: Use Redis distributed locks (Redlock) during mutations on a single event ID to prevent race conditions during rapid concurrent edits from multiple client sessions.
+
+### Your calendar becomes slow when rendering thousands of events. What frontend optimization techniques would you apply to improve performance, and why would each technique help?
+
+1. **Windowing / Virtual Scroll (e.g., Virtualized Grids)**:
+   - *Why it helps*: Rendering thousands of calendar DOM elements degrades layout calculations and scrolling frame rates. Virtualization ensures that only events currently present inside the scroll viewport (plus a small buffer) are actually mounted in the DOM. This reduces active DOM nodes from thousands to under 100, maintaining constant rendering speed.
+2. **Event Debouncing & Throttling**:
+   - *Why it helps*: Throttling pointer movements during drag-and-drop or resize interactions limits reflow computations to 60 frames per second. It prevents the browser from executing heavy coordinate calculation callbacks on every single pixel movement.
+3. **React Memoization (`React.memo`, `useMemo`, `useCallback`)**:
+   - *Why it helps*: Prevents redundant React re-render cycles. By memoizing `EventBlock` items and day columns, React bypasses layout re-generation unless event properties or screen coordinates actually change.
+4. **CSS Transforms & Composite Acceleration**:
+   - *Why it helps*: Animate dragging blocks using `transform: translate3d(x, y, 0)` instead of modifying standard layout properties like `top`/`left`. This offloads layout translation to the GPU composite layer, bypassing expensive browser document reflows.
+5. **Web Workers for Recurrence Rule Expansion**:
+   - *Why it helps*: Expansions of complex `rrules` over long periods (like expanding hundreds of recurring events for a month grid view) are CPU-intensive. Offloading these computations to a background Web Worker keeps the main UI thread unblocked, ensuring smooth interaction feedback.
