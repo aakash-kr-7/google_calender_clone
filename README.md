@@ -2,6 +2,8 @@
 
 A full-stack, pixel-perfect Google Calendar clone. This application supports user authentication (including Google OAuth), responsive day/week/month views, event dragging, event resizing, recurrence rules parsing, scheduling overlap conflict detections, and power-user workflows.
 
+🚀 **Live Hosted Demo**: [https://google-calender-clone-vert.vercel.app](https://google-calender-clone-vert.vercel.app)
+
 ---
 
 ## Architecture & Data Flow Diagram
@@ -181,33 +183,35 @@ Alternatively, you can delete the `backend/calendar.db` file, and a fresh databa
 
 ---
 
-## Deployment Guide (Vercel & Render)
+## Deployed Application & Setup Guide
 
-To share a hosted link of this application, you can deploy the frontend and backend in minutes using free tiers on Vercel and Render.
+This application is deployed and running live on the cloud.
 
-### 1. Host the Backend API on Render
+- **Frontend UI**: [https://google-calender-clone-vert.vercel.app](https://google-calender-clone-vert.vercel.app) (Hosted on Vercel)
+- **Backend API**: Hosted on Render (Web Service)
 
-1. Sign up on [Render](https://render.com/).
-2. Create a new **Web Service** and connect this GitHub repository.
-3. Configure the following build settings:
-   - **Root Directory**: `backend`
-   - **Runtime**: `Python`
-   - **Build Command**: `pip install -r requirements.txt`
-   - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-4. Add the following environment variables under **Environment**:
-   - `DATABASE_URL`: `sqlite:///./calendar.db`
-5. Click **Deploy**. Copy the generated service URL (e.g. `https://your-backend.onrender.com`).
+### Deployment Architecture & Configuration
 
-### 2. Host the Frontend UI on Vercel
+#### 1. Backend Web Service (Render)
+The backend API is hosted on Render as a Python Web Service linked directly to the main branch of this repository:
+- **Build Settings**:
+  - **Root Directory**: `backend`
+  - **Runtime**: `Python`
+  - **Build Command**: `pip install -r requirements.txt`
+  - **Start Command**: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- **Environment Variables**:
+  - `DATABASE_URL`: `sqlite:///./calendar.db` (initializes and persists the SQLite database file)
 
-1. Sign up on [Vercel](https://vercel.com/).
-2. Create a new project and import this GitHub repository.
-3. In the project setup, select **Vite** as the **Framework Preset**.
-4. Set the **Root Directory** to `frontend`.
-5. Add the following environment variables:
-   - `VITE_API_URL`: Paste your Render backend URL (e.g. `https://your-backend.onrender.com`).
-   - `VITE_GOOGLE_CLIENT_ID`: (Optional) Your Google OAuth client credentials.
-6. Click **Deploy**. Vercel will provide your hosted live link (e.g. `https://gcal-clone.vercel.app`).
+#### 2. Frontend SPA Client (Vercel)
+The React + Vite client is hosted on Vercel:
+- **Build Settings**:
+  - **Root Directory**: `frontend`
+  - **Framework Preset**: `Vite`
+  - **Build Command**: `npm run build`
+  - **Output Directory**: `dist`
+- **Environment Variables**:
+  - `VITE_API_URL`: Points to the live Render backend API URL to route requests successfully.
+  - `VITE_GOOGLE_CLIENT_ID`: Preconfigured Google OAuth Client ID for sign-in functionality.
 
 ---
 
