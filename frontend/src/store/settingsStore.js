@@ -25,6 +25,7 @@ export const useSettingsStore = create((set, get) => {
     defaultEventDuration: getSaved('gcal-defaultEventDuration', 30), // minutes
     showWeekends: getSaved('gcal-showWeekends', true),
     overlapClashAlert: getSaved('gcal-overlapClashAlert', true),
+    compactMode: getSaved('gcal-compactMode', false),
     settingsOpen: false,
 
     openSettings: () => set({ settingsOpen: true }),
@@ -64,6 +65,13 @@ export const useSettingsStore = create((set, get) => {
       const next = !current
       localStorage.setItem('gcal-overlapClashAlert', JSON.stringify(next))
       set({ overlapClashAlert: next })
+    },
+
+    toggleCompactMode: () => {
+      const current = get().compactMode
+      const next = !current
+      localStorage.setItem('gcal-compactMode', JSON.stringify(next))
+      set({ compactMode: next })
     }
   }
 })

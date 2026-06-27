@@ -272,7 +272,7 @@ export default function LoginPage() {
                   <span className="bg-slate-100 text-slate-700 font-bold rounded-full w-5 h-5 flex items-center justify-center mr-2.5 shrink-0 mt-0.5">2</span>
                   <div>
                     <span className="font-semibold">Configure OAuth Consent Screen</span>
-                    <p className="text-slate-500 mt-0.5">Under APIs & Services > OAuth consent screen, choose External, add your email contact, and save scopes.</p>
+                    <p className="text-slate-500 mt-0.5">Under APIs & Services &gt; OAuth consent screen, choose External, add your email contact, and save scopes.</p>
                   </div>
                 </div>
 
@@ -280,7 +280,7 @@ export default function LoginPage() {
                   <span className="bg-slate-100 text-slate-700 font-bold rounded-full w-5 h-5 flex items-center justify-center mr-2.5 shrink-0 mt-0.5">3</span>
                   <div>
                     <span className="font-semibold">Create Web Client Credentials</span>
-                    <p className="text-slate-500 mt-0.5">Go to Credentials > Create Credentials > OAuth client ID. Select Web application. Add authorized origins:</p>
+                    <p className="text-slate-500 mt-0.5">Go to Credentials &gt; Create Credentials &gt; OAuth client ID. Select Web application. Add authorized origins:</p>
                     <div className="bg-slate-50 border border-slate-150 rounded-lg p-2 mt-2 font-mono flex items-center justify-between text-[11px]">
                       <span>http://localhost:5173</span>
                       <button

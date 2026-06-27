@@ -8,6 +8,7 @@ import { useDraggable } from '@dnd-kit/core'
 import { CSS } from '@dnd-kit/utilities'
 import { formatEventTime } from '../../utils/dateUtils'
 import { useResize } from '../../hooks/useResize'
+import { useSettingsStore } from '../../store/settingsStore'
 import clsx from 'clsx'
 
 export default function EventBlock({ event, top, height, left, width, onEdit, onDelete, onClick }) {
@@ -17,6 +18,7 @@ export default function EventBlock({ event, top, height, left, width, onEdit, on
   })
 
   const { localEndTime, startResize } = useResize(event)
+  const { darkMode } = useSettingsStore()
 
   const style = {
     position:  'absolute',
@@ -27,9 +29,9 @@ export default function EventBlock({ event, top, height, left, width, onEdit, on
     // dnd-kit applies transform during drag
     transform: CSS.Translate.toString(transform),
     zIndex:    isDragging ? 50 : 1,
-    // Semi-transparent background using the event's color
-    backgroundColor: event.color + '26',
-    borderLeft: `3px solid ${event.color}`,
+    // Solid background with white text in dark mode for contrast; tinted in light mode
+    backgroundColor: darkMode ? event.color + 'cc' : event.color + '26',
+    borderLeft: darkMode ? 'none' : `3px solid ${event.color}`,
     borderRadius: '4px',
     overflow: 'hidden',
     cursor: isDragging ? 'grabbing' : 'grab',
@@ -38,7 +40,7 @@ export default function EventBlock({ event, top, height, left, width, onEdit, on
     scale: isDragging ? '1.02' : '1',
     transition: isDragging ? 'none' : 'box-shadow 0.15s, opacity 0.15s',
     userSelect: 'none',
-    padding: '2px 4px',
+    padding: darkMode ? '3px 6px' : '2px 4px',
   }
 
   const handleClick = (e) => {
@@ -58,10 +60,10 @@ export default function EventBlock({ event, top, height, left, width, onEdit, on
       {...attributes}
       {...listeners}
     >
-      <p className="font-semibold text-[11px] leading-tight truncate" style={{ color: event.color }}>
+      <p className="font-semibold text-[11px] leading-tight truncate" style={{ color: darkMode ? '#ffffff' : event.color }}>
         {event.title}
       </p>
-      <p className="text-[10px] opacity-75 truncate" style={{ color: event.color }}>
+      <p className="text-[10px] opacity-75 truncate" style={{ color: darkMode ? '#f1f5f9' : event.color }}>
         {formatEventTime(startTime, endDisplay)}
       </p>
 
@@ -69,7 +71,7 @@ export default function EventBlock({ event, top, height, left, width, onEdit, on
       <div
         onMouseDown={startResize}
         className="absolute bottom-0 left-0 right-0 h-1.5 cursor-ns-resize"
-        style={{ backgroundColor: event.color + '60' }}
+        style={{ backgroundColor: darkMode ? 'rgba(255, 255, 255, 0.3)' : event.color + '60' }}
       />
     </div>
   )

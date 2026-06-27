@@ -120,11 +120,11 @@ export default function EventModal() {
       <div className="bg-gcal-surface rounded-2xl shadow-2xl w-[560px] max-w-[95vw] max-h-[90vh] overflow-y-auto modal-enter">
         {/* Draft banner */}
         {showDraftBanner && (
-          <div className="bg-yellow-50 border-b border-yellow-100 px-6 py-2 flex items-center justify-between">
-            <span className="text-xs text-yellow-700">You have an unsaved draft</span>
+          <div className="bg-yellow-50 dark:bg-yellow-950/20 border-b border-yellow-100 dark:border-yellow-900/30 px-6 py-2 flex items-center justify-between">
+            <span className="text-xs text-yellow-700 dark:text-yellow-400">You have an unsaved draft</span>
             <div className="flex gap-2">
-              <button onClick={() => setShowDraftBanner(false)} className="text-xs text-yellow-600 hover:underline">Use draft</button>
-              <button onClick={() => { clearDraft(); setFormData(buildFormData(null, modalInitialData)); setShowDraftBanner(false) }} className="text-xs text-yellow-600 hover:underline">Dismiss</button>
+              <button onClick={() => setShowDraftBanner(false)} className="text-xs text-yellow-600 dark:text-yellow-400 hover:underline">Use draft</button>
+              <button onClick={() => { clearDraft(); setFormData(buildFormData(null, modalInitialData)); setShowDraftBanner(false) }} className="text-xs text-yellow-600 dark:text-yellow-400 hover:underline">Dismiss</button>
             </div>
           </div>
         )}
@@ -140,7 +140,7 @@ export default function EventModal() {
             onChange={(e) => setFormData((d) => ({ ...d, title: e.target.value }))}
             className="flex-1 text-2xl font-normal border-0 border-b-2 border-gcal-border focus:outline-none focus:border-gcal-blue pb-1 text-gcal-text placeholder-gray-300"
           />
-          <button onClick={closeModal} className="p-1.5 rounded-full hover:bg-gray-100 text-gcal-light">
+          <button onClick={closeModal} className="p-1.5 rounded-full hover:bg-gcal-hover text-gcal-light">
             <X size={18} />
           </button>
         </div>

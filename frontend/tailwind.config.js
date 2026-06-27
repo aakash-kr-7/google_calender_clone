@@ -12,6 +12,7 @@ export default {
         'gcal-border':     'var(--color-gcal-border, #dadce0)',
         'gcal-bg':         'var(--color-gcal-bg, #f6f8fc)',
         'gcal-surface':    'var(--color-gcal-surface, #ffffff)',
+        'gcal-hover':      'var(--color-gcal-hover, #f1f3f4)',
       },
       fontFamily: {
         sans: ['Google Sans', 'Roboto', 'Arial', 'sans-serif'],

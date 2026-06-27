@@ -2,9 +2,9 @@ import clsx from 'clsx'
 
 const variants = {
   primary:   'bg-gcal-blue text-white hover:bg-gcal-blue-hover',
-  secondary: 'border border-gcal-border text-gcal-text hover:bg-gray-50',
-  ghost:     'text-gcal-text hover:bg-gray-100',
-  danger:    'text-red-600 hover:bg-red-50',
+  secondary: 'border border-gcal-border text-gcal-text hover:bg-gcal-hover',
+  ghost:     'text-gcal-text hover:bg-gcal-hover',
+  danger:    'text-red-600 hover:bg-red-50 dark:hover:bg-red-950/20',
 }
 const sizes = {
   sm: 'px-3 py-1 text-sm',

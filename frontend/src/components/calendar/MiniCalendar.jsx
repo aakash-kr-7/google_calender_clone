@@ -3,19 +3,22 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { format, isSameDay, isToday, startOfWeek, endOfWeek, addMonths, subMonths } from 'date-fns'
 import { getMonthGrid, getWeekDays } from '../../utils/dateUtils'
 import { useCalendarStore } from '../../store/calendarStore'
+import { useSettingsStore } from '../../store/settingsStore'
 import clsx from 'clsx'
 
 export default function MiniCalendar() {
   // miniDate is INDEPENDENT of the main calendar's currentDate
   const [miniDate, setMiniDate] = useState(new Date())
   const { currentDate, setCurrentDate, viewMode } = useCalendarStore()
+  const { weekStartsOn } = useSettingsStore()
 
-  const grid = getMonthGrid(miniDate)
-  const weekDays = ['S','M','T','W','T','F','S']
+  const grid = getMonthGrid(miniDate, weekStartsOn)
+  const baseWeekDays = ['S','M','T','W','T','F','S']
+  const weekDays = [...baseWeekDays.slice(weekStartsOn), ...baseWeekDays.slice(0, weekStartsOn)]
 
   // Highlight the entire week if in week view
-  const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 })
-  const weekEnd   = endOfWeek(currentDate,   { weekStartsOn: 0 })
+  const weekStart = startOfWeek(currentDate, { weekStartsOn })
+  const weekEnd   = endOfWeek(currentDate,   { weekStartsOn })
   const inCurrentWeek = (d) => viewMode === 'week' && d >= weekStart && d <= weekEnd
 
   const handleDayClick = (day) => {
@@ -30,11 +33,11 @@ export default function MiniCalendar() {
           {format(miniDate, 'MMMM yyyy')}
         </span>
         <div className="flex gap-1">
-          <button onClick={() => setMiniDate(subMonths(miniDate, 1))} className="p-1 rounded-full hover:bg-gray-100">
-            <ChevronLeft size={14} />
+          <button onClick={() => setMiniDate(subMonths(miniDate, 1))} className="p-1 rounded-full hover:bg-gcal-hover">
+            <ChevronLeft size={14} className="text-gcal-text" />
           </button>
-          <button onClick={() => setMiniDate(addMonths(miniDate, 1))} className="p-1 rounded-full hover:bg-gray-100">
-            <ChevronRight size={14} />
+          <button onClick={() => setMiniDate(addMonths(miniDate, 1))} className="p-1 rounded-full hover:bg-gcal-hover">
+            <ChevronRight size={14} className="text-gcal-text" />
           </button>
         </div>
       </div>
@@ -59,12 +62,12 @@ export default function MiniCalendar() {
               key={i}
               onClick={() => handleDayClick(day)}
               className={clsx(
-                'w-7 h-7 mx-auto flex items-center justify-center rounded-full text-[11px] transition-colors',
-                !isCurrentMonth && 'text-gcal-light',
-                isCurrentMonth && !isSelected && !isTodayDate && 'text-gcal-text hover:bg-gray-100',
+                'w-7 h-7 mx-auto flex items-center justify-center rounded-full text-[11px] transition-colors focus:outline-none',
+                !isCurrentMonth && 'text-gcal-light opacity-50',
+                isCurrentMonth && !isSelected && !isTodayDate && 'text-gcal-text hover:bg-gcal-hover',
                 isTodayDate && !isSelected && 'text-gcal-blue font-bold',
                 isSelected && 'bg-gcal-blue text-white font-bold',
-                inWeek && !isSelected && 'bg-blue-50',
+                inWeek && !isSelected && 'bg-blue-50 dark:bg-blue-950/40',
               )}
             >
               {format(day, 'd')}

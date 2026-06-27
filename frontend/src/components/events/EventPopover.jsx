@@ -37,7 +37,7 @@ export default function EventPopover({ event, position, onClose, onEdit, onDelet
           <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: event.color }} />
           <h3 className="font-medium text-gcal-text text-base leading-tight">{event.title}</h3>
         </div>
-        <button onClick={onClose} className="p-1 rounded-full hover:bg-gray-100 text-gcal-light">
+        <button onClick={onClose} className="p-1 rounded-full hover:bg-gcal-hover text-gcal-light">
           <X size={16} />
         </button>
       </div>
@@ -70,14 +70,14 @@ export default function EventPopover({ event, position, onClose, onEdit, onDelet
       <div className="flex justify-end gap-1 border-t border-gcal-border pt-3 mt-2">
         <button
           onClick={() => { onEdit(event); onClose() }}
-          className="p-2 rounded-full hover:bg-gray-100 text-gcal-light transition-colors"
+          className="p-2 rounded-full hover:bg-gcal-hover text-gcal-light transition-colors"
           title="Edit"
         >
           <Pencil size={16} />
         </button>
         <button
           onClick={() => { onDelete(event.id); onClose() }}
-          className="p-2 rounded-full hover:bg-red-50 text-gcal-light hover:text-red-600 transition-colors"
+          className="p-2 rounded-full hover:bg-red-50 dark:hover:bg-red-950/20 text-gcal-light hover:text-red-600 transition-colors"
           title="Delete"
         >
           <Trash2 size={16} />

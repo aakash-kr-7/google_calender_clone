@@ -21,7 +21,7 @@ export default function EventForm({ formData, onChange }) {
     saveDraft(updated) // persist draft on every change
   }
 
-  const inputCls = 'border-0 border-b border-gcal-border focus:outline-none focus:border-gcal-blue text-gcal-text text-sm py-1 w-full bg-transparent'
+  const inputCls = 'border-0 border-b border-gcal-border focus:outline-none focus:border-gcal-blue text-gcal-text text-sm py-1 w-full bg-gcal-surface'
   const rowCls   = 'flex items-start gap-4 py-3 border-b border-gcal-border'
   const iconCls  = 'text-gcal-light mt-0.5 shrink-0'
 
@@ -46,7 +46,7 @@ export default function EventForm({ formData, onChange }) {
                   onChange={(e) => update('startTime', e.target.value)}
                   className={`${inputCls} w-auto`}
                 />
-                <span className="text-gcal-light">–</span>
+                <span className="text-gcal-light">to</span>
                 <input
                   type="time"
                   value={formData.endTime}
@@ -61,7 +61,7 @@ export default function EventForm({ formData, onChange }) {
             <Switch
               checked={formData.isAllDay}
               onChange={(v) => update('isAllDay', v)}
-              className={`${formData.isAllDay ? 'bg-gcal-blue' : 'bg-gray-200'} relative inline-flex h-5 w-9 items-center rounded-full transition-colors`}
+              className={`${formData.isAllDay ? 'bg-gcal-blue' : 'bg-gray-200 dark:bg-slate-700'} relative inline-flex h-5 w-9 items-center rounded-full transition-colors`}
             >
               <span className={`${formData.isAllDay ? 'translate-x-5' : 'translate-x-1'} inline-block h-3 w-3 transform rounded-full bg-white transition-transform`} />
             </Switch>

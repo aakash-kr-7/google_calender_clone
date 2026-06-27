@@ -12,6 +12,7 @@
   --color-gcal-border: #dadce0;
   --color-gcal-bg: #f6f8fc;
   --color-gcal-surface: #ffffff;
+  --color-gcal-hover: #f1f3f4;
 }
 
 .dark {
@@ -23,6 +24,7 @@
   --color-gcal-border: #334155;
   --color-gcal-bg: #0f172a;
   --color-gcal-surface: #1e293b;
+  --color-gcal-hover: #334155;
 }
 
 * { box-sizing: border-box; }

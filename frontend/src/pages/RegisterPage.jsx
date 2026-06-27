@@ -61,12 +61,25 @@ export default function RegisterPage() {
     }
   }, [isGoogleConfigured])
 
+  const decodeJwt = (token) => {
+    try {
+      return JSON.parse(atob(token.split('.')[1]))
+    } catch {
+      return null
+    }
+  }
+
   const handleGoogleSuccess = async (response) => {
     setLoading(true)
     try {
+      const decoded = decodeJwt(response.credential)
       const res = await loginGoogle({ credential: response.credential })
       localStorage.setItem('token', res.data.access_token)
-      localStorage.setItem('user', JSON.stringify({ email: email || 'google-user@gmail.com' }))
+      localStorage.setItem('user', JSON.stringify({
+        email: decoded?.email || 'google-user@gmail.com',
+        name: decoded?.name || decoded?.email?.split('@')[0] || 'User',
+        picture: decoded?.picture || ''
+      }))
       toast.success('Successfully registered with Google!')
       setTimeout(() => navigate('/'), 800)
     } catch (err) {

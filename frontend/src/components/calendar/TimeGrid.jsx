@@ -8,9 +8,6 @@ import { useEventStore } from '../../store/eventStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { RRule } from 'rrule'
 
-// GRID_HEIGHT_PX: 1px per minute = 1440px total. Makes time math trivial.
-const GRID_HEIGHT_PX = 1440
-
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
 
 function expandRecurring(event, rangeStart, rangeEnd) {
@@ -35,14 +32,16 @@ export default function TimeGrid({ days, events }) {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [popover, setPopover] = useState(null) // { event, x, y }
   const { openCreateModal, openEditModal, deleteEvent } = useEventStore()
-  const { defaultEventDuration } = useSettingsStore()
+  const { defaultEventDuration, compactMode } = useSettingsStore()
 
-  // Auto-scroll to 7 AM on mount
+  const GRID_HEIGHT_PX = compactMode ? 960 : 1440
+
+  // Auto-scroll to 7 AM on mount or when density changes
   useEffect(() => {
     if (scrollRef.current) {
       scrollRef.current.scrollTop = (7 / 24) * GRID_HEIGHT_PX - 60
     }
-  }, [])
+  }, [GRID_HEIGHT_PX])
 
   // Update current time line every 60 seconds
   useEffect(() => {

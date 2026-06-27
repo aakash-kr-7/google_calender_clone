@@ -48,8 +48,8 @@ export default function MonthView() {
               key={i}
               onClick={() => openCreateModal({ start: day, end: day })}
               className={clsx(
-                'border-b border-r border-gcal-border p-1 min-h-[100px] cursor-pointer hover:bg-gray-50 transition-colors',
-                !inMonth && 'bg-gray-50/50'
+                'border-b border-r border-gcal-border p-1 min-h-[100px] cursor-pointer hover:bg-gcal-hover transition-colors',
+                !inMonth && 'opacity-40'
               )}
             >
               {/* Date number */}
