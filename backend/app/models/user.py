@@ -1,10 +1,7 @@
-from datetime import datetime
-
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
-
+from datetime import datetime
 from app.database import Base
-
 
 class User(Base):
     __tablename__ = "users"
@@ -14,7 +11,4 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     created_at = Column(DateTime, default=datetime.utcnow)
 
-    # One user can own many events. cascade="all, delete-orphan" means
-    # deleting a user also cleans up their events instead of leaving
-    # orphaned rows with a dangling user_id.
-    events = relationship("Event", back_populates="owner", cascade="all, delete-orphan")
+    events = relationship("Event", back_populates="user", foreign_keys="Event.user_id")
