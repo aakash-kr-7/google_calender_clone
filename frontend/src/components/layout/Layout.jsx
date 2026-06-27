@@ -154,77 +154,147 @@ export default function Layout() {
 
       {/* Theme Choice Pop-up at First Launch */}
       {showThemePrompt && (
-        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100] animate-in fade-in duration-200">
-          <div className="bg-gcal-surface border border-gcal-border rounded-2xl p-8 max-w-md w-full shadow-2xl text-center flex flex-col items-center">
-            {promptStep === 1 ? (
-              <>
-                <div className="w-12 h-12 rounded-full bg-gcal-blue/10 flex items-center justify-center text-gcal-blue mb-4">
-                  <Sparkles className="w-6 h-6 animate-pulse" />
-                </div>
-                <h2 className="text-xl font-semibold text-gcal-text mb-2">Welcome!</h2>
-                <p className="text-xs text-gcal-light mb-6 px-4">
-                  Choose your preferred visual theme to get started. You can change this setting anytime in the gear dropdown.
-                </p>
-                
-                <div className="grid grid-cols-2 gap-4 w-full">
-                  {/* Light Mode Card */}
-                  <button 
-                    onClick={() => handleThemeSelect(false)}
-                    className="flex flex-col items-center gap-3 p-4 border border-gcal-border hover:border-gcal-blue rounded-xl bg-white hover:bg-slate-50 transition text-slate-800 focus:outline-none shadow-sm cursor-pointer"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center text-amber-500">
-                      <Sun size={20} />
-                    </div>
-                    <span className="text-sm font-semibold">Light Theme</span>
-                  </button>
-                  
-                  {/* Dark Mode Card */}
-                  <button 
-                    onClick={() => handleThemeSelect(true)}
-                    className="flex flex-col items-center gap-3 p-4 border border-slate-700 hover:border-gcal-blue rounded-xl bg-slate-900 hover:bg-slate-800 transition text-slate-200 focus:outline-none shadow-sm cursor-pointer"
-                  >
-                    <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-blue-400">
-                      <Moon size={20} />
-                    </div>
-                    <span className="text-sm font-semibold">Dark Theme</span>
-                  </button>
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="w-12 h-12 rounded-full bg-gcal-blue/10 flex items-center justify-center text-gcal-blue mb-4 animate-bounce">
-                  <Sparkles className="w-6 h-6" />
-                </div>
-                <h2 className="text-xl font-bold text-gcal-text mb-3">Google Calendar Clone</h2>
-                
-                <div className="text-sm leading-relaxed space-y-4 mb-6 text-left w-full">
-                  <div className="bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/30 p-3 rounded-lg flex items-start gap-2.5">
-                    <span className="text-base">⭐</span>
-                    <p className="text-xs text-gcal-text">
-                      The <strong className="font-semibold text-gcal-blue">star symbol (Sparkles icon)</strong> at the top shows all the extra features and enhancements implemented.
-                    </p>
-                  </div>
-                  
-                  <div className="bg-slate-50 dark:bg-slate-900/40 border border-slate-100 dark:border-slate-850 p-3 rounded-lg flex items-start gap-2.5">
-                    <span className="text-base">📖</span>
-                    <p className="text-xs text-gcal-text">
-                      The GitHub repository <strong className="font-semibold text-gcal-text">README.md</strong> contains all the questions and viable documentation.
-                    </p>
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[100]"
+             style={{ animation: 'fadeIn 0.2s ease' }}>
+          <div className="relative overflow-hidden rounded-[20px] border border-gcal-border shadow-2xl w-full max-w-[420px] mx-4 bg-gcal-surface">
+
+            <div className="relative px-9 pt-10 pb-8 flex flex-col items-center text-center">
+
+              {promptStep === 1 ? (
+                <>
+                  {/* Icon */}
+                  <div className="w-12 h-12 rounded-[14px] flex items-center justify-center mb-5"
+                       style={{ background: 'var(--gcal-blue-light, rgba(26,115,232,0.1))', border: '0.5px solid var(--gcal-blue-border, rgba(26,115,232,0.25))' }}>
+                    <Sparkles className="w-[22px] h-[22px] text-gcal-blue" />
                   </div>
 
-                  <p className="text-center font-medium text-xs text-gcal-light pt-2">
-                    Please enjoy Google Calendar Clone built by <strong className="text-gcal-blue font-semibold">Aakash Kumar</strong>
+                  <p className="text-[11px] font-medium tracking-[0.1em] uppercase mb-2 text-gcal-blue">
+                    Welcome
                   </p>
-                </div>
+                  <h2 className="text-[20px] font-semibold leading-snug mb-2 text-gcal-text"
+                      style={{ letterSpacing: '-0.02em' }}>
+                    Set your look
+                  </h2>
+                  <p className="text-[13px] leading-relaxed mb-8 px-2 text-gcal-text-secondary">
+                    Pick a visual theme to get started. Swap it anytime in settings.
+                  </p>
 
-                <button
-                  onClick={handleWelcomeDismiss}
-                  className="w-full bg-gcal-blue hover:bg-gcal-blue-hover text-white text-sm font-semibold rounded-xl py-3 transition shadow-md cursor-pointer"
-                >
-                  Boot Up App & Enjoy!
-                </button>
-              </>
-            )}
+                  {/* Theme cards */}
+                  <div className="grid grid-cols-2 gap-2.5 w-full mb-6">
+                    {/* Light */}
+                    <button
+                      onClick={() => handleThemeSelect(false)}
+                      className="group flex flex-col items-center gap-2.5 rounded-[14px] p-4 transition-all duration-150 focus:outline-none cursor-pointer border border-gcal-border bg-gcal-hover hover:border-gcal-blue"
+                      style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.08)' }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(26,115,232,0.15)' }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.08)' }}>
+                      {/* Mini preview */}
+                      <div className="w-full h-[52px] rounded-lg overflow-hidden border border-gcal-border"
+                           style={{ background: '#fff' }}>
+                        <div style={{ height: 4, background: 'var(--gcal-blue, #1a73e8)' }} />
+                        <div className="flex flex-col gap-1 p-2">
+                          <div style={{ height: 3, borderRadius: 2, background: 'rgba(26,115,232,0.4)', width: '60%' }} />
+                          <div style={{ height: 3, borderRadius: 2, background: 'rgba(0,0,0,0.1)', width: '80%' }} />
+                          <div style={{ height: 3, borderRadius: 2, background: 'rgba(0,0,0,0.1)', width: '50%' }} />
+                        </div>
+                      </div>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center text-[15px]"
+                           style={{ background: 'rgba(251,191,36,0.15)' }}>
+                        <Sun size={15} style={{ color: '#f59e0b' }} />
+                      </div>
+                      <span className="text-[12.5px] font-medium text-gcal-text">Light</span>
+                    </button>
+
+                    {/* Dark */}
+                    <button
+                      onClick={() => handleThemeSelect(true)}
+                      className="group flex flex-col items-center gap-2.5 rounded-[14px] p-4 transition-all duration-150 focus:outline-none cursor-pointer border border-gcal-border bg-gcal-hover hover:border-gcal-blue"
+                      style={{ boxShadow: '0 1px 4px rgba(0,0,0,0.12)' }}
+                      onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 4px 16px rgba(26,115,232,0.15)' }}
+                      onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.12)' }}>
+                      <div className="w-full h-[52px] rounded-lg overflow-hidden border border-gcal-border"
+                           style={{ background: '#1e1e1e' }}>
+                        <div style={{ height: 4, background: 'var(--gcal-blue, #1a73e8)' }} />
+                        <div className="flex flex-col gap-1 p-2">
+                          <div style={{ height: 3, borderRadius: 2, background: 'rgba(26,115,232,0.5)', width: '60%' }} />
+                          <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.12)', width: '80%' }} />
+                          <div style={{ height: 3, borderRadius: 2, background: 'rgba(255,255,255,0.12)', width: '50%' }} />
+                        </div>
+                      </div>
+                      <div className="w-8 h-8 rounded-full flex items-center justify-center"
+                           style={{ background: 'rgba(26,115,232,0.12)' }}>
+                        <Moon size={15} className="text-gcal-blue" />
+                      </div>
+                      <span className="text-[12.5px] font-medium text-gcal-text">Dark</span>
+                    </button>
+                  </div>
+
+                  <div className="w-full h-px mb-5 bg-gcal-border" />
+                  <p className="text-[11.5px] text-gcal-text-secondary opacity-60">
+                    No account needed · Your data stays local
+                  </p>
+                </>
+              ) : (
+                <>
+                  {/* Step 2 */}
+                  <div className="w-12 h-12 rounded-[14px] flex items-center justify-center mb-5"
+                       style={{ background: 'rgba(52,168,83,0.1)', border: '0.5px solid rgba(52,168,83,0.25)' }}>
+                    <Sparkles className="w-[22px] h-[22px]" style={{ color: '#34a853' }} />
+                  </div>
+
+                  <p className="text-[11px] font-medium tracking-[0.1em] uppercase mb-2"
+                     style={{ color: '#34a853' }}>
+                    You're all set
+                  </p>
+                  <h2 className="text-[20px] font-semibold mb-2 text-gcal-text"
+                      style={{ letterSpacing: '-0.02em' }}>
+                    Google Calendar Clone
+                  </h2>
+                  <p className="text-[13px] leading-relaxed mb-6 px-2 text-gcal-text-secondary">
+                    Built with every feature you'd expect — and a few you wouldn't.
+                  </p>
+
+                  <div className="flex flex-col gap-2 w-full mb-6 text-left">
+                    {[
+                      {
+                        color: 'var(--gcal-blue, #1a73e8)',
+                        text: (
+                          <>The <strong className="font-medium text-gcal-text">★ sparkles icon</strong> at the top lists all extra features and enhancements baked in.</>
+                        ),
+                      },
+                      {
+                        color: '#34a853',
+                        text: (
+                          <>Full documentation lives in the <strong className="font-medium text-gcal-text">README.md</strong> — answers, rationale, and notes all in one place.</>
+                        ),
+                      },
+                    ].map((item, i) => (
+                      <div key={i}
+                           className="flex items-start gap-2.5 rounded-[10px] px-3 py-2.5 border border-gcal-border bg-gcal-hover">
+                        <div className="w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0"
+                             style={{ background: item.color }} />
+                        <p className="text-[12.5px] leading-relaxed text-gcal-text-secondary">
+                          {item.text}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={handleWelcomeDismiss}
+                    className="w-full rounded-[12px] py-[13px] text-[14px] font-semibold text-white transition-all duration-150 cursor-pointer bg-gcal-blue hover:opacity-90"
+                    style={{ border: 'none', letterSpacing: '-0.01em' }}
+                    onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)' }}
+                    onMouseLeave={e => { e.currentTarget.style.transform = '' }}>
+                    Open Calendar
+                  </button>
+
+                  <p className="text-[11.5px] mt-4 text-gcal-text-secondary opacity-50">
+                    Built by <span className="text-gcal-blue font-medium opacity-80">Aakash Kumar</span>
+                  </p>
+                </>
+              )}
+            </div>
           </div>
         </div>
       )}
