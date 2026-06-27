@@ -158,7 +158,7 @@ export default function EventModal() {
             placeholder="Add title"
             value={formData.title}
             onChange={(e) => setFormData((d) => ({ ...d, title: e.target.value }))}
-            className="flex-1 text-2xl font-normal border-0 border-b-2 border-gcal-border focus:outline-none focus:border-gcal-blue pb-1 text-gcal-text placeholder-gray-300"
+            className="flex-1 text-2xl font-normal border-0 border-b-2 border-gcal-border focus:outline-none focus:border-gcal-blue pb-1 text-gcal-text bg-transparent placeholder-gray-400 dark:placeholder-slate-500"
           />
           <button onClick={closeModal} className="p-1.5 rounded-full hover:bg-gcal-hover text-gcal-light">
             <X size={18} />
