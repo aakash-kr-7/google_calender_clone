@@ -1,6 +1,7 @@
 import { Menu, ChevronLeft, ChevronRight, Search, Settings } from 'lucide-react'
 import { format } from 'date-fns'
 import { useCalendarStore } from '../../store/calendarStore'
+import { useSettingsStore } from '../../store/settingsStore'
 import clsx from 'clsx'
 
 const VIEW_LABELS = { day: 'Day', week: 'Week', month: 'Month' }
@@ -21,11 +22,12 @@ function getPeriodTitle(date, viewMode) {
 
 export default function Header() {
   const { currentDate, viewMode, navigatePrev, navigateNext, goToToday, setViewMode, toggleSidebar } = useCalendarStore()
+  const { openSettings } = useSettingsStore()
   const userEmail = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')).email : 'U'
   const initial = userEmail[0].toUpperCase()
 
   return (
-    <header className="h-16 bg-white border-b border-gcal-border flex items-center px-4 gap-3 shrink-0">
+    <header className="h-16 bg-gcal-surface border-b border-gcal-border flex items-center px-4 gap-3 shrink-0">
       {/* Left */}
       <button onClick={toggleSidebar} className="p-2 rounded-full hover:bg-gray-100 text-gcal-light">
         <Menu size={20} />
@@ -72,7 +74,7 @@ export default function Header() {
         ))}
       </div>
 
-      <button className="p-2 rounded-full hover:bg-gray-100 text-gcal-light">
+      <button onClick={openSettings} className="p-2 rounded-full hover:bg-gcal-border/20 text-gcal-light">
         <Settings size={20} />
       </button>
 

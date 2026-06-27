@@ -11,7 +11,7 @@ export default function DayView() {
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
-      <div className="flex shrink-0 border-b border-gcal-border bg-white">
+      <div className="flex shrink-0 border-b border-gcal-border bg-gcal-surface">
         <div className="w-16 shrink-0" />
         <div className="flex-1 flex flex-col items-start py-2 px-4">
           <span className="text-[11px] font-medium uppercase tracking-wide text-gcal-light">

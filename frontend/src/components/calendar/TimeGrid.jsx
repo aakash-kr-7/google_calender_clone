@@ -5,6 +5,7 @@ import { timeToPercent, durationToPercent, minutesFromMidnight } from '../../uti
 import EventBlock from '../events/EventBlock'
 import EventPopover from '../events/EventPopover'
 import { useEventStore } from '../../store/eventStore'
+import { useSettingsStore } from '../../store/settingsStore'
 import { RRule } from 'rrule'
 
 // GRID_HEIGHT_PX: 1px per minute = 1440px total. Makes time math trivial.
@@ -34,6 +35,7 @@ export default function TimeGrid({ days, events }) {
   const [currentTime, setCurrentTime] = useState(new Date())
   const [popover, setPopover] = useState(null) // { event, x, y }
   const { openCreateModal, openEditModal, deleteEvent } = useEventStore()
+  const { defaultEventDuration } = useSettingsStore()
 
   // Auto-scroll to 7 AM on mount
   useEffect(() => {
@@ -56,7 +58,7 @@ export default function TimeGrid({ days, events }) {
     const clickedMinutes = Math.round((y / GRID_HEIGHT_PX) * 1440 / 30) * 30
     const start = new Date(day)
     start.setHours(Math.floor(clickedMinutes / 60), clickedMinutes % 60, 0, 0)
-    const end = new Date(start.getTime() + 60 * 60000)
+    const end = new Date(start.getTime() + defaultEventDuration * 60000)
     openCreateModal({ start, end })
   }
 

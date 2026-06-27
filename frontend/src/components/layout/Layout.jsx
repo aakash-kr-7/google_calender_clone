@@ -1,6 +1,7 @@
 import Header from './Header'
 import Sidebar from './Sidebar'
 import EventModal from '../events/EventModal'
+import SettingsModal from './SettingsModal'
 import MonthView from '../views/MonthView'
 import WeekView from '../views/WeekView'
 import DayView from '../views/DayView'
@@ -24,6 +25,7 @@ export default function Layout() {
         </main>
       </div>
       <EventModal />
+      <SettingsModal />
       <Toaster position="bottom-center" />
     </div>
   )

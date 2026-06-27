@@ -2,6 +2,7 @@ import { format, isToday } from 'date-fns'
 import { getWeekDays } from '../../utils/dateUtils'
 import { useCalendarStore } from '../../store/calendarStore'
 import { useEventStore } from '../../store/eventStore'
+import { useSettingsStore } from '../../store/settingsStore'
 import TimeGrid from '../calendar/TimeGrid'
 import AllDayRow from '../calendar/AllDayRow'
 import clsx from 'clsx'
@@ -9,12 +10,17 @@ import clsx from 'clsx'
 export default function WeekView() {
   const { currentDate } = useCalendarStore()
   const { events } = useEventStore()
-  const days = getWeekDays(currentDate)
+  const { weekStartsOn, showWeekends } = useSettingsStore()
+  
+  let days = getWeekDays(currentDate, weekStartsOn)
+  if (!showWeekends) {
+    days = days.filter((d) => d.getDay() !== 0 && d.getDay() !== 6)
+  }
 
   return (
     <div className="flex flex-col flex-1 overflow-hidden">
       {/* Column headers */}
-      <div className="flex shrink-0 border-b border-gcal-border bg-white">
+      <div className="flex shrink-0 border-b border-gcal-border bg-gcal-surface">
         <div className="w-16 shrink-0" /> {/* spacer for time labels */}
         {days.map((day, i) => (
           <div

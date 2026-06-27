@@ -2,6 +2,7 @@ import { format, isSameMonth, isToday, isSameDay } from 'date-fns'
 import { getMonthGrid } from '../../utils/dateUtils'
 import { useCalendarStore } from '../../store/calendarStore'
 import { useEventStore } from '../../store/eventStore'
+import { useSettingsStore } from '../../store/settingsStore'
 import clsx from 'clsx'
 
 const DAY_HEADERS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
@@ -9,16 +10,24 @@ const DAY_HEADERS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat']
 export default function MonthView() {
   const { currentDate } = useCalendarStore()
   const { events, openCreateModal, openEditModal, deleteEvent } = useEventStore()
-  const grid = getMonthGrid(currentDate)
+  const { weekStartsOn, showWeekends } = useSettingsStore()
+  
+  let headers = [...DAY_HEADERS.slice(weekStartsOn), ...DAY_HEADERS.slice(0, weekStartsOn)]
+  let grid = getMonthGrid(currentDate, weekStartsOn)
+  
+  if (!showWeekends) {
+    headers = headers.filter((h) => h !== 'Sun' && h !== 'Sat')
+    grid = grid.filter((day) => day.getDay() !== 0 && day.getDay() !== 6)
+  }
 
   const getDayEvents = (day) =>
     events.filter((e) => isSameDay(new Date(e.start_time), day))
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden bg-white">
+    <div className="flex flex-col flex-1 overflow-hidden bg-gcal-surface">
       {/* Day headers */}
-      <div className="grid grid-cols-7 border-b border-gcal-border">
-        {DAY_HEADERS.map((d) => (
+      <div className={clsx("grid border-b border-gcal-border", showWeekends ? "grid-cols-7" : "grid-cols-5")}>
+        {headers.map((d) => (
           <div key={d} className="text-center text-[11px] font-medium text-gcal-light py-2 uppercase tracking-wider">
             {d}
           </div>
@@ -26,7 +35,7 @@ export default function MonthView() {
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-7 flex-1 overflow-hidden">
+      <div className={clsx("grid flex-1 overflow-hidden", showWeekends ? "grid-cols-7" : "grid-cols-5")}>
         {grid.map((day, i) => {
           const dayEvents = getDayEvents(day)
           const inMonth   = isSameMonth(day, currentDate)

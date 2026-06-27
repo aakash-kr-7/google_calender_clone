@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import * as api from '../api/client'
 import toast from 'react-hot-toast'
+import { useSettingsStore } from './settingsStore'
 
 export const useEventStore = create((set, get) => ({
   events: [],
@@ -29,8 +30,9 @@ export const useEventStore = create((set, get) => ({
 
   // ── Creating ──────────────────────────────────────────────────────────────
   createEvent: async (data) => {
+    const clashAlert = useSettingsStore.getState().overlapClashAlert
     try {
-      const res = await api.createEvent(data)
+      const res = await api.createEvent(data, !clashAlert)
       set((s) => ({ events: [...s.events, res.data] }))
       get().clearDraft()
       get().closeModal()
@@ -58,8 +60,9 @@ export const useEventStore = create((set, get) => ({
 
   // ── Updating ──────────────────────────────────────────────────────────────
   updateEvent: async (id, data) => {
+    const clashAlert = useSettingsStore.getState().overlapClashAlert
     try {
-      const res = await api.updateEvent(id, data)
+      const res = await api.updateEvent(id, data, !clashAlert)
       // Replace the old event in the array with the updated version
       set((s) => ({
         events: s.events.map((e) => (e.id === id ? res.data : e)),

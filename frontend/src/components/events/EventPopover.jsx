@@ -28,7 +28,7 @@ export default function EventPopover({ event, position, onClose, onEdit, onDelet
   return (
     <div
       ref={ref}
-      className="popover-enter fixed z-50 w-72 bg-white rounded-xl shadow-2xl p-4"
+      className="popover-enter fixed z-50 w-72 bg-gcal-surface rounded-xl shadow-2xl p-4"
       style={{ top, left }}
     >
       {/* Header */}

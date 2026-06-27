@@ -117,7 +117,7 @@ export default function EventModal() {
       className="fixed inset-0 bg-black/40 backdrop-blur-[2px] flex items-center justify-center z-40"
       onClick={(e) => { if (e.target === e.currentTarget) closeModal() }}
     >
-      <div className="bg-white rounded-2xl shadow-2xl w-[560px] max-w-[95vw] max-h-[90vh] overflow-y-auto modal-enter">
+      <div className="bg-gcal-surface rounded-2xl shadow-2xl w-[560px] max-w-[95vw] max-h-[90vh] overflow-y-auto modal-enter">
         {/* Draft banner */}
         {showDraftBanner && (
           <div className="bg-yellow-50 border-b border-yellow-100 px-6 py-2 flex items-center justify-between">

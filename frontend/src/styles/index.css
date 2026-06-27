@@ -3,13 +3,36 @@
 @tailwind utilities;
 @import './animations.css';
 
+:root {
+  --color-gcal-blue: #1a73e8;
+  --color-gcal-blue-hover: #1557b0;
+  --color-gcal-red: #d93025;
+  --color-gcal-text: #3c4043;
+  --color-gcal-light: #70757a;
+  --color-gcal-border: #dadce0;
+  --color-gcal-bg: #f6f8fc;
+  --color-gcal-surface: #ffffff;
+}
+
+.dark {
+  --color-gcal-blue: #3b82f6;
+  --color-gcal-blue-hover: #2563eb;
+  --color-gcal-red: #ef4444;
+  --color-gcal-text: #e2e8f0;
+  --color-gcal-light: #94a3b8;
+  --color-gcal-border: #334155;
+  --color-gcal-bg: #0f172a;
+  --color-gcal-surface: #1e293b;
+}
+
 * { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background-color: #f6f8fc;
+  background-color: var(--color-gcal-bg);
   font-family: 'Google Sans', Roboto, Arial, sans-serif;
-  color: #3c4043;
+  color: var(--color-gcal-text);
+  transition: background-color 200ms ease, color 200ms ease, border-color 200ms ease;
 }
 
 /* Thin scrollbar for time grid */

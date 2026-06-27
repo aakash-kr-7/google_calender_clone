@@ -4,18 +4,18 @@ import {
   getHours, getMinutes,
 } from 'date-fns'
 
-// Returns 7 Date objects for the week containing `date` (Sunday → Saturday)
-export function getWeekDays(date) {
-  const start = startOfWeek(date, { weekStartsOn: 0 })
+// Returns 7 Date objects for the week containing `date`
+export function getWeekDays(date, weekStartsOn = 0) {
+  const start = startOfWeek(date, { weekStartsOn })
   return Array.from({ length: 7 }, (_, i) => addDays(start, i))
 }
 
 // Returns a flat array of Date objects filling a 6×7 month grid.
 // Includes trailing/leading days from adjacent months to fill the grid.
-export function getMonthGrid(date) {
+export function getMonthGrid(date, weekStartsOn = 0) {
   const monthStart = startOfMonth(date)
   const monthEnd   = endOfMonth(date)
-  const gridStart  = startOfWeek(monthStart, { weekStartsOn: 0 })
+  const gridStart  = startOfWeek(monthStart, { weekStartsOn })
   const gridEnd    = addDays(gridStart, 41) // always 42 cells (6 weeks)
   return eachDayOfInterval({ start: gridStart, end: gridEnd })
 }
