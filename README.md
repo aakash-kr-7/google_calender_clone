@@ -6,7 +6,7 @@ A full-stack, pixel-perfect Google Calendar clone. This application supports use
 
 ---
 
-## Architecture & Data Flow Diagram
+## Architecture & Data Flow Diagram (a more detailed version for review is in /docs/detailed_architecture_diagram.png)
 
 ```mermaid
 flowchart LR
