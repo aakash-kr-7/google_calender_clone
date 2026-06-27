@@ -4,21 +4,22 @@ import { computeEventLayout } from '../../utils/eventLayout'
 import { timeToPercent, durationToPercent, minutesFromMidnight } from '../../utils/dateUtils'
 import EventBlock from '../events/EventBlock'
 import EventPopover from '../events/EventPopover'
+import EventHoverPreview from '../events/EventHoverPreview'
 import { useEventStore } from '../../store/eventStore'
 import { useSettingsStore } from '../../store/settingsStore'
 import { RRule } from 'rrule'
+import clsx from 'clsx'
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i)
 
 function expandRecurring(event, rangeStart, rangeEnd) {
-  // Expand a recurring event's rrule into individual instances within the visible range
   if (!event.rrule) return []
   try {
     const rule = RRule.fromString(`DTSTART:${format(new Date(event.start_time), "yyyyMMdd'T'HHmmss'Z'")}\nRRULE:${event.rrule}`)
     const duration = new Date(event.end_time) - new Date(event.start_time)
     return rule.between(rangeStart, rangeEnd, true).map((date) => ({
       ...event,
-      id: `${event.id}_${date.toISOString()}`, // virtual id for recurring instances
+      id: `${event.id}_${date.toISOString()}`,
       start_time: date.toISOString(),
       end_time:   new Date(date.getTime() + duration).toISOString(),
       _isInstance: true,
@@ -31,6 +32,9 @@ export default function TimeGrid({ days, events }) {
   const gridRef   = useRef()
   const [currentTime, setCurrentTime] = useState(new Date())
   const [popover, setPopover] = useState(null) // { event, x, y }
+  const [hoveredEvent, setHoveredEvent] = useState(null) // { event, x, y }
+  const hoverTimeoutRef = useRef(null)
+  
   const { openCreateModal, openEditModal, deleteEvent } = useEventStore()
   const { defaultEventDuration, compactMode } = useSettingsStore()
 
@@ -46,11 +50,37 @@ export default function TimeGrid({ days, events }) {
   // Update current time line every 60 seconds
   useEffect(() => {
     const interval = setInterval(() => setCurrentTime(new Date()), 60000)
-    return () => clearInterval(interval) // cleanup prevents memory leak
+    return () => clearInterval(interval)
   }, [])
 
-  // Click on empty grid area → open create modal with that time pre-filled
-  const handleGridClick = (e, day) => {
+  // Clear hover timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
+    }
+  }, [])
+
+  const handleMouseEnterEvent = (e, event) => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
+    
+    // Don't show preview if user is dragging or popover is open
+    if (popover) return
+
+    const clientX = e.clientX
+    const clientY = e.clientY
+    
+    hoverTimeoutRef.current = setTimeout(() => {
+      setHoveredEvent({ event, x: clientX + 16, y: clientY - 30 })
+    }, 150)
+  }
+
+  const handleMouseLeaveEvent = () => {
+    if (hoverTimeoutRef.current) clearTimeout(hoverTimeoutRef.current)
+    setHoveredEvent(null)
+  }
+
+  // Double click on empty grid area → open create modal with that time pre-filled
+  const handleGridDoubleClick = (e, day) => {
     if (e.target !== e.currentTarget) return
     const rect = gridRef.current.getBoundingClientRect()
     const y    = e.clientY - rect.top + scrollRef.current.scrollTop
@@ -64,7 +94,6 @@ export default function TimeGrid({ days, events }) {
   const rangeStart = days[0]
   const rangeEnd   = days[days.length - 1]
 
-  // Get events for a specific day, expanding recurring ones
   const getDayEvents = (day) => {
     const regular = events.filter(
       (e) => !e.rrule && isSameDay(new Date(e.start_time), day) && !e.is_all_day
@@ -86,7 +115,7 @@ export default function TimeGrid({ days, events }) {
           {HOURS.map((h) => (
             <div
               key={h}
-              className="absolute right-2 text-[10px] text-gcal-light"
+              className="absolute right-2 text-[10px] text-gcal-light font-medium"
               style={{ top: `${(h / 24) * 100}%`, transform: 'translateY(-50%)' }}
             >
               {h === 0 ? '' : format(new Date().setHours(h, 0), 'h a')}
@@ -98,18 +127,23 @@ export default function TimeGrid({ days, events }) {
         {days.map((day, dayIdx) => {
           const dayEvents = getDayEvents(day)
           const isToday   = isSameDay(day, new Date())
+          const dayOfWeek = day.getDay()
+          const isWeekend = dayOfWeek === 0 || dayOfWeek === 6
 
           return (
             <div
               key={dayIdx}
-              className="flex-1 relative border-l border-gcal-border"
-              onClick={(e) => handleGridClick(e, day)}
+              onDoubleClick={(e) => handleGridDoubleClick(e, day)}
+              className={clsx(
+                'flex-1 relative border-l border-gcal-border transition-colors duration-200 select-none cursor-pointer',
+                isWeekend && 'weekend-cell'
+              )}
             >
               {/* Hour lines */}
               {HOURS.map((h) => (
                 <div
                   key={h}
-                  className="absolute left-0 right-0 border-t border-gcal-border"
+                  className="absolute left-0 right-0 border-t border-gcal-border pointer-events-none"
                   style={{ top: `${(h / 24) * 100}%` }}
                 />
               ))}
@@ -118,7 +152,7 @@ export default function TimeGrid({ days, events }) {
               {HOURS.map((h) => (
                 <div
                   key={`half-${h}`}
-                  className="absolute left-0 right-0 border-t border-gcal-border opacity-40"
+                  className="absolute left-0 right-0 border-t border-gcal-border opacity-40 pointer-events-none"
                   style={{ top: `${((h + 0.5) / 24) * 100}%`, borderStyle: 'dashed' }}
                 />
               ))}
@@ -127,11 +161,17 @@ export default function TimeGrid({ days, events }) {
               {isToday && (
                 <div
                   className="absolute left-0 right-0 z-10 pointer-events-none"
-                  style={{ top: `${currentTimePercent}%` }}
+                  style={{ 
+                    top: `${currentTimePercent}%`, 
+                    transition: 'top 1s cubic-bezier(0.4, 0, 0.2, 1)' 
+                  }}
                 >
                   <div className="relative flex items-center">
-                    <div className="w-2.5 h-2.5 rounded-full bg-gcal-red -ml-1.5 shrink-0" />
-                    <div className="flex-1 h-[2px] bg-gcal-red" />
+                    <div className="w-2.5 h-2.5 rounded-full bg-gcal-red -ml-1.2 shrink-0 animate-time-pulse z-20" />
+                    <div 
+                      className="flex-1 h-[2px] bg-gcal-red z-10" 
+                      style={{ boxShadow: '0 0 8px rgba(217, 48, 37, 0.6)' }}
+                    />
                   </div>
                 </div>
               )}
@@ -145,7 +185,12 @@ export default function TimeGrid({ days, events }) {
                   height={durationToPercent(new Date(event.start_time), new Date(event.end_time))}
                   left={event.leftPercent + 1}
                   width={event.widthPercent - 2}
-                  onClick={(e) => setPopover({ event, x: e.clientX + 8, y: e.clientY - 40 })}
+                  onClick={(e) => {
+                    handleMouseLeaveEvent()
+                    setPopover({ event, x: e.clientX + 8, y: e.clientY - 40 })
+                  }}
+                  onMouseEnter={handleMouseEnterEvent}
+                  onMouseLeave={handleMouseLeaveEvent}
                   onEdit={openEditModal}
                   onDelete={deleteEvent}
                 />
@@ -165,6 +210,9 @@ export default function TimeGrid({ days, events }) {
           onDelete={(id) => { deleteEvent(id); setPopover(null) }}
         />
       )}
+
+      {/* Hover preview tooltip */}
+      <EventHoverPreview event={hoveredEvent?.event} position={hoveredEvent} />
     </div>
   )
 }

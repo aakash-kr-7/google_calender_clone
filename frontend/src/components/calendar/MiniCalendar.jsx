@@ -65,8 +65,8 @@ export default function MiniCalendar() {
                 'w-7 h-7 mx-auto flex items-center justify-center rounded-full text-[11px] transition-colors focus:outline-none',
                 !isCurrentMonth && 'text-gcal-light opacity-50',
                 isCurrentMonth && !isSelected && !isTodayDate && 'text-gcal-text hover:bg-gcal-hover',
-                isTodayDate && !isSelected && 'text-gcal-blue font-bold',
-                isSelected && 'bg-gcal-blue text-white font-bold',
+                isTodayDate && !isSelected && 'text-gcal-blue font-bold animate-spring-pop',
+                isSelected && 'bg-gcal-blue text-white font-bold animate-spring-pop',
                 inWeek && !isSelected && 'bg-blue-50 dark:bg-blue-950/40',
               )}
             >

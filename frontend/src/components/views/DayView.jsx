@@ -17,7 +17,7 @@ export default function DayView() {
           <span className="text-[11px] font-medium uppercase tracking-wide text-gcal-light">
             {format(currentDate, 'EEE')}
           </span>
-          <span className={`text-3xl font-light ${isToday(currentDate) ? 'text-gcal-blue' : 'text-gcal-text'}`}>
+          <span className={`text-3xl font-light ${isToday(currentDate) ? 'text-gcal-blue animate-spring-pop inline-block' : 'text-gcal-text'}`}>
             {format(currentDate, 'd')}
           </span>
           <span className="text-sm text-gcal-light">{format(currentDate, 'MMMM yyyy')}</span>

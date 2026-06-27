@@ -11,6 +11,7 @@ class EventCreate(BaseModel):
     color: str = "#1a73e8"
     is_all_day: bool = False
     rrule: Optional[str] = None
+    attendees: Optional[str] = None
 
     @field_validator("end_time")
     @classmethod
@@ -28,6 +29,7 @@ class EventUpdate(BaseModel):
     color: Optional[str] = None
     is_all_day: Optional[bool] = None
     rrule: Optional[str] = None
+    attendees: Optional[str] = None
 
 class EventResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
@@ -42,6 +44,7 @@ class EventResponse(BaseModel):
     is_all_day: bool
     rrule: Optional[str]
     recurrence_id: Optional[int]
+    attendees: Optional[str]
     created_at: datetime
     updated_at: datetime
 

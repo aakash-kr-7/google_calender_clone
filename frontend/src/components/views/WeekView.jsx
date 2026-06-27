@@ -35,7 +35,7 @@ export default function WeekView() {
             </span>
             <span className={clsx(
               'text-2xl font-normal leading-tight',
-              isToday(day) && 'bg-gcal-blue text-white w-9 h-9 rounded-full flex items-center justify-center text-xl'
+              isToday(day) && 'bg-gcal-blue text-white w-9 h-9 rounded-full flex items-center justify-center text-xl animate-spring-pop'
             )}>
               {format(day, 'd')}
             </span>

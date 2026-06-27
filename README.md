@@ -166,3 +166,17 @@ The backend will run on [http://localhost:8000](http://localhost:8000). You can 
 The frontend application will boot up at [http://localhost:5173](http://localhost:5173). 
 
 Open this address in your browser, register an account, and begin scheduling!
+
+---
+
+### Database Migrations
+
+If you are upgrading an existing database, run the migration script in the backend folder to add the new `attendees` column to your events table:
+
+```bash
+cd backend
+python migrate.py
+```
+
+Alternatively, you can delete the `backend/calendar.db` file, and a fresh database with the updated columns will be initialized automatically on the next server startup.
+

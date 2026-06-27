@@ -1,7 +1,8 @@
+@import './animations.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import './animations.css';
+
 
 :root {
   --color-gcal-blue: #1a73e8;
@@ -41,3 +42,12 @@ body {
 .time-grid-scroll::-webkit-scrollbar { width: 6px; }
 .time-grid-scroll::-webkit-scrollbar-track { background: transparent; }
 .time-grid-scroll::-webkit-scrollbar-thumb { background: #dadce0; border-radius: 3px; }
+
+/* Weekend shading */
+.weekend-cell {
+  background-color: rgba(241, 243, 244, 0.4);
+}
+.dark .weekend-cell {
+  background-color: rgba(30, 41, 59, 0.25);
+}
+

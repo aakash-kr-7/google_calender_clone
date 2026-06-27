@@ -25,6 +25,7 @@ class Event(Base):
     # we create a new Event row with recurrence_id = parent.id
     # so we know this row overrides a specific occurrence.
     recurrence_id = Column(Integer, ForeignKey("events.id"), nullable=True)
+    attendees = Column(Text, nullable=True)
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

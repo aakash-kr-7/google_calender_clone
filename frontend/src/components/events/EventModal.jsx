@@ -33,7 +33,7 @@ export default function EventModal() {
   const {
     isModalOpen, modalMode, selectedEvent, modalInitialData,
     closeModal, createEvent, updateEvent, loadDraft, clearDraft,
-    overlapWarning,
+    overlapWarning, dismissOverlapWarning, selectedSlot,
   } = useEventStore()
 
   const [formData, setFormData] = useState(() => buildFormData())
@@ -69,6 +69,25 @@ export default function EventModal() {
     }
   }, [overlapWarning])
 
+  // Handle slot suggestion selections
+  useEffect(() => {
+    if (selectedSlot) {
+      const start = new Date(selectedSlot.start)
+      const end = new Date(selectedSlot.end)
+      setFormData((prev) => ({
+        ...prev,
+        startDate: format(start, 'yyyy-MM-dd'),
+        startTime: format(start, 'HH:mm'),
+        endDate: format(end, 'yyyy-MM-dd'),
+        endTime: format(end, 'HH:mm'),
+      }))
+      // Reset selection state
+      useEventStore.setState({ selectedSlot: null })
+      toast.dismiss('overlap-warning')
+      dismissOverlapWarning()
+    }
+  }, [selectedSlot, dismissOverlapWarning])
+
   // ESC to close
   useEffect(() => {
     const handler = (e) => { if (e.key === 'Escape') closeModal() }
@@ -93,6 +112,7 @@ export default function EventModal() {
       color:       data.color,
       is_all_day:  data.isAllDay,
       rrule:       data.rrule       || null,
+      attendees:   data.attendees   || null,
       start_time:  startStr,
       end_time:    endStr,
     }
@@ -147,6 +167,47 @@ export default function EventModal() {
 
         {/* Form */}
         <div className="px-6 pb-4">
+          {/* Scheduling conflict inline suggestions banner */}
+          {overlapWarning && (
+            <div className="bg-amber-50 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-900/30 rounded-xl p-4 mb-4 animate-in fade-in duration-200 select-none">
+              <p className="font-semibold text-amber-800 dark:text-amber-400 text-xs mb-1">⚠️ Scheduling Conflict</p>
+              <p className="text-[11px] text-amber-700 dark:text-amber-300/80 mb-2">
+                Suggested free slots for this week:
+              </p>
+              <div className="flex gap-2 flex-wrap">
+                {overlapWarning.suggestions && overlapWarning.suggestions.length > 0 ? (
+                  overlapWarning.suggestions.map((slot, idx) => {
+                    const start = new Date(slot.start)
+                    const end = new Date(slot.end)
+                    return (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setFormData((prev) => ({
+                            ...prev,
+                            startDate: format(start, 'yyyy-MM-dd'),
+                            startTime: format(start, 'HH:mm'),
+                            endDate: format(end, 'yyyy-MM-dd'),
+                            endTime: format(end, 'HH:mm'),
+                          }))
+                          // Dismiss both modal warning state and the global overlap warning toast
+                          toast.dismiss('overlap-warning')
+                          dismissOverlapWarning()
+                        }}
+                        className="px-2.5 py-1.5 bg-amber-100 dark:bg-amber-900/40 hover:bg-amber-200 dark:hover:bg-amber-900/60 text-amber-800 dark:text-amber-300 text-[10px] font-semibold rounded-lg transition cursor-pointer"
+                      >
+                        {format(start, 'EEE h:mm a')} – {format(end, 'h:mm a')}
+                      </button>
+                    )
+                  })
+                ) : (
+                  <span className="text-[10px] text-amber-600 dark:text-amber-400">No free slots found in the visible week.</span>
+                )}
+              </div>
+            </div>
+          )}
+
           <EventForm formData={formData} onChange={setFormData} />
         </div>
 

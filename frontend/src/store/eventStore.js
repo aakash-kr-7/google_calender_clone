@@ -1,7 +1,9 @@
+import React from 'react'
 import { create } from 'zustand'
 import * as api from '../api/client'
 import toast from 'react-hot-toast'
 import { useSettingsStore } from './settingsStore'
+import { findAvailableSlots } from '../utils/slotFinder'
 
 export const useEventStore = create((set, get) => ({
   events: [],
@@ -15,7 +17,8 @@ export const useEventStore = create((set, get) => ({
   modalInitialData: null,    // pre-fill data when clicking on time grid
 
   // Overlap warning state — holds data needed to force-save
-  overlapWarning: null,      // { overlapping_events, pendingData, pendingId, isUpdate }
+  overlapWarning: null,      // { overlapping_events, pendingData, pendingId, isUpdate, suggestions }
+  selectedSlot: null,
 
   // ── Fetching ─────────────────────────────────────────────────────────────
   fetchEvents: async (start, end) => {
@@ -42,6 +45,10 @@ export const useEventStore = create((set, get) => ({
       if (err.response?.status === 409) {
         // Overlap detected — store warning data so user can choose to force-save
         const detail = err.response.data.detail
+        const suggestions = findAvailableSlots(
+          { ...data, id: null },
+          get().events
+        )
         set({
           overlapWarning: {
             overlapping_events: detail.overlapping_events,
@@ -49,6 +56,7 @@ export const useEventStore = create((set, get) => ({
             pendingData: data,
             pendingId: null,
             isUpdate: false,
+            suggestions,
           }
         })
         return false
@@ -73,6 +81,10 @@ export const useEventStore = create((set, get) => ({
     } catch (err) {
       if (err.response?.status === 409) {
         const detail = err.response.data.detail
+        const suggestions = findAvailableSlots(
+          { ...data, id },
+          get().events
+        )
         set({
           overlapWarning: {
             overlapping_events: detail.overlapping_events,
@@ -80,6 +92,7 @@ export const useEventStore = create((set, get) => ({
             pendingData: data,
             pendingId: id,
             isUpdate: true,
+            suggestions,
           }
         })
         return false
@@ -91,12 +104,52 @@ export const useEventStore = create((set, get) => ({
 
   // ── Deleting ──────────────────────────────────────────────────────────────
   deleteEvent: async (id) => {
+    const eventToDelete = get().events.find((e) => e.id === id)
     try {
       await api.deleteEvent(id)
       set((s) => ({ events: s.events.filter((e) => e.id !== id) }))
-      toast.success('Event deleted')
+      
+      if (eventToDelete) {
+        const backup = {
+          title: eventToDelete.title,
+          description: eventToDelete.description,
+          location: eventToDelete.location,
+          color: eventToDelete.color,
+          is_all_day: eventToDelete.is_all_day,
+          rrule: eventToDelete.rrule,
+          start_time: eventToDelete.start_time,
+          end_time: eventToDelete.end_time,
+          attendees: eventToDelete.attendees,
+        }
+        
+        toast((t) => (
+          React.createElement('div', { className: "flex items-center justify-between gap-4 w-full" },
+            React.createElement('span', { className: "text-sm font-medium text-gcal-text" }, "Event deleted"),
+            React.createElement('button', {
+              onClick: () => {
+                toast.dismiss(t.id)
+                get().restoreEvent(backup)
+              },
+              className: "text-gcal-blue dark:text-blue-400 font-semibold text-xs border border-gcal-blue/20 hover:border-gcal-blue/40 px-2 py-0.5 rounded hover:bg-gcal-blue/5 transition cursor-pointer"
+            }, "Undo")
+          )
+        ), { duration: 5000 })
+      } else {
+        toast.success('Event deleted')
+      }
     } catch {
       toast.error('Failed to delete event')
+    }
+  },
+
+  // ── Restoring (Undo) ──────────────────────────────────────────────────────
+  restoreEvent: async (eventData) => {
+    try {
+      const res = await api.createEvent(eventData, true) // force save bypasses overlaps
+      set((s) => ({ events: [...s.events, res.data] }))
+      toast.success('Event restored')
+    } catch {
+      toast.error('Failed to restore event')
     }
   },
 

@@ -11,12 +11,13 @@ import { useResize } from '../../hooks/useResize'
 import { useSettingsStore } from '../../store/settingsStore'
 import clsx from 'clsx'
 
-export default function EventBlock({ event, top, height, left, width, onEdit, onDelete, onClick }) {
+export default function EventBlock({ event, top, height, left, width, onEdit, onDelete, onClick, onMouseEnter, onMouseLeave }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
     id: event.id,
     data: event,
   })
 
+  const [isHovered, setIsHovered] = useState(false)
   const { localEndTime, startResize } = useResize(event)
   const { darkMode } = useSettingsStore()
 
@@ -26,9 +27,9 @@ export default function EventBlock({ event, top, height, left, width, onEdit, on
     height:    `${Math.max(height, 1.5)}%`,
     left:      `${left}%`,
     width:     `${width}%`,
-    // dnd-kit applies transform during drag
-    transform: CSS.Translate.toString(transform),
-    zIndex:    isDragging ? 50 : 1,
+    // dnd-kit applies transform during drag, otherwise apply scale on hover
+    transform: CSS.Translate.toString(transform) || (isHovered ? 'scale(1.025)' : 'none'),
+    zIndex:    isDragging ? 50 : isHovered ? 30 : 1,
     // Solid background with white text in dark mode for contrast; tinted in light mode
     backgroundColor: darkMode ? event.color + 'cc' : event.color + '26',
     borderLeft: darkMode ? 'none' : `3px solid ${event.color}`,
@@ -36,9 +37,14 @@ export default function EventBlock({ event, top, height, left, width, onEdit, on
     overflow: 'hidden',
     cursor: isDragging ? 'grabbing' : 'grab',
     opacity: isDragging ? 0.7 : 1,
-    boxShadow: isDragging ? '0 4px 12px rgba(0,0,0,0.2)' : 'none',
-    scale: isDragging ? '1.02' : '1',
-    transition: isDragging ? 'none' : 'box-shadow 0.15s, opacity 0.15s',
+    boxShadow: isDragging 
+      ? '0 8px 24px rgba(0,0,0,0.25)' 
+      : isHovered 
+        ? '0 6px 16px rgba(0,0,0,0.15)' 
+        : 'none',
+    transition: isDragging 
+      ? 'none' 
+      : 'transform 200ms cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 150ms ease, z-index 150ms ease',
     userSelect: 'none',
     padding: darkMode ? '3px 6px' : '2px 4px',
   }
@@ -46,6 +52,16 @@ export default function EventBlock({ event, top, height, left, width, onEdit, on
   const handleClick = (e) => {
     if (isDragging) return
     onClick?.(e)
+  }
+
+  const handleMouseEnter = (e) => {
+    setIsHovered(true)
+    onMouseEnter?.(e, event)
+  }
+
+  const handleMouseLeave = (e) => {
+    setIsHovered(false)
+    onMouseLeave?.(e)
   }
 
   const startTime = new Date(event.start_time)
@@ -57,6 +73,8 @@ export default function EventBlock({ event, top, height, left, width, onEdit, on
       style={style}
       className="event-enter"
       onClick={handleClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
       {...attributes}
       {...listeners}
     >

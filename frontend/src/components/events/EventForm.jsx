@@ -1,5 +1,5 @@
 import { Switch } from '@headlessui/react'
-import { MapPin, AlignLeft, Repeat } from 'lucide-react'
+import { MapPin, AlignLeft, Repeat, Users } from 'lucide-react'
 import { format } from 'date-fns'
 import ColorPicker from '../ui/ColorPicker'
 import { useEventStore } from '../../store/eventStore'
@@ -92,6 +92,18 @@ export default function EventForm({ formData, onChange }) {
           placeholder="Add location"
           value={formData.location || ''}
           onChange={(e) => update('location', e.target.value)}
+          className={`${inputCls} flex-1`}
+        />
+      </div>
+
+      {/* Attendees */}
+      <div className={rowCls}>
+        <Users size={18} className={iconCls} />
+        <input
+          type="text"
+          placeholder="Add guests (emails separated by commas)"
+          value={formData.attendees || ''}
+          onChange={(e) => update('attendees', e.target.value)}
           className={`${inputCls} flex-1`}
         />
       </div>

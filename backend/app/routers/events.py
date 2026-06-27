@@ -57,6 +57,7 @@ def create_event(
         color=event_data.color,
         is_all_day=event_data.is_all_day,
         rrule=event_data.rrule,
+        attendees=event_data.attendees,
     )
     db.add(event)
     db.commit()
@@ -143,6 +144,7 @@ def create_exception(
         color=event_data.color,
         is_all_day=event_data.is_all_day,
         rrule=None,
+        attendees=event_data.attendees,
     )
     db.add(exception)
     db.commit()

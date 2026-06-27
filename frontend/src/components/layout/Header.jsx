@@ -28,6 +28,13 @@ export default function Header() {
   const { openSettings, compactMode, toggleCompactMode } = useSettingsStore()
   const [dropdownOpen, setDropdownOpen] = useState(false)
   
+  const getGreeting = () => {
+    const hr = new Date().getHours()
+    if (hr < 12) return 'Good morning'
+    if (hr < 17) return 'Good afternoon'
+    return 'Good evening'
+  }
+
   const userData = localStorage.getItem('user') ? JSON.parse(localStorage.getItem('user')) : null
   const userEmail = userData?.email || 'user@example.com'
   const userName = userData?.name || userEmail.split('@')[0]
@@ -275,6 +282,11 @@ export default function Header() {
           </>
         )}
       </div>
+
+      {/* Dynamic Greeting */}
+      <span className="hidden md:inline text-xs font-semibold text-gcal-light mr-1 select-none">
+        {getGreeting()}, {userName}
+      </span>
 
       {/* User profile avatar */}
       <div className="relative">
